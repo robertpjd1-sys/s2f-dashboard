@@ -1,1264 +1,2611 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>S2F Content Studio</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#F8F9FA; --bg2:#FFFFFF; --bg3:#F0F2F0;
-  --green:#2E4A1E; --green2:#3A5C27; --green3:#4E7A34;
-  --green-t:rgba(46,74,30,0.08); --green-t2:rgba(46,74,30,0.15);
-  --gold:#C8922A; --gold2:#E0A83A; --gold3:#F5C842;
-  --gold-t:rgba(200,146,42,0.12); --gold-t2:rgba(200,146,42,0.22);
-  --text:#1A2614; --text2:#3D5032; --text3:#7A9068; --text4:#A8BEA0;
-  --border:#E2EAD8; --border2:#D0DCC4;
-  --red:#C0392B; --red-bg:#FEF2F2;
-  --s1:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
-  --s2:0 4px 16px rgba(0,0,0,0.08),0 2px 6px rgba(0,0,0,0.04);
-  --s3:0 12px 40px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);
-  --r:12px; --r2:8px; --r3:20px;
-  --trans:all 0.18s cubic-bezier(0.4,0,0.2,1);
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{font-size:14px;}
-body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S2F Content Studio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --bg2: #FFFFFF;
+      --bg3: #F0F2F0;
+      --green: #2E4A1E;
+      --green2: #3A5C27;
+      --green3: #4E7A34;
+      --green-t: rgba(46, 74, 30, 0.08);
+      --green-t2: rgba(46, 74, 30, 0.15);
+      --gold: #C8922A;
+      --gold2: #E0A83A;
+      --gold3: #F5C842;
+      --gold-t: rgba(200, 146, 42, 0.12);
+      --gold-t2: rgba(200, 146, 42, 0.22);
+      --text: #1A2614;
+      --text2: #3D5032;
+      --text3: #7A9068;
+      --text4: #A8BEA0;
+      --border: #E2EAD8;
+      --border2: #D0DCC4;
+      --red: #C0392B;
+      --red-bg: #FEF2F2;
+      --s1: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --s2: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+      --s3: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+      --r: 12px;
+      --r2: 8px;
+      --r3: 20px;
+      --trans: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* ══════════════════════════════
+    html {
+      font-size: 14px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
+
+    /* ══════════════════════════════
    LOGIN
 ══════════════════════════════ */
-.login-wrap{position:fixed;inset:0;background:linear-gradient(135deg,var(--green) 0%,#1a2e10 60%,#0d1a08 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
-.login-wrap::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
-.login-card{position:relative;background:rgba(255,255,255,0.97);border-radius:24px;padding:48px 40px;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,0.4);}
-.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
-.login-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--gold2),var(--gold));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 16px rgba(200,146,42,0.4);}
-.login-brand-text{font-size:20px;font-weight:800;color:var(--green);letter-spacing:-0.5px;}
-.login-brand-sub{font-size:11px;color:var(--text3);font-weight:500;margin-top:1px;}
-.login-heading{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.8px;margin-bottom:6px;}
-.login-sub{font-size:13px;color:var(--text3);margin-bottom:28px;line-height:1.5;}
-.login-field{position:relative;margin-bottom:14px;}
-.login-field input{width:100%;padding:14px 16px;background:var(--bg);border:2px solid var(--border);border-radius:var(--r);font-size:15px;font-family:'Sora',sans-serif;outline:none;color:var(--text);text-align:center;letter-spacing:0.1em;transition:var(--trans);}
-.login-field input:focus{border-color:var(--gold2);background:#fff;}
-.login-btn{width:100%;padding:14px;border-radius:var(--r);border:none;background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;letter-spacing:0.01em;box-shadow:0 4px 16px rgba(46,74,30,0.35);transition:var(--trans);}
-.login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(46,74,30,0.45);}
-.login-err{color:var(--red);font-size:12px;margin-top:10px;display:none;font-weight:500;}
+    .login-wrap {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--green) 0%, #1a2e10 60%, #0d1a08 100%);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-/* ══════════════════════════════
+    .login-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .login-card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 24px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4);
+    }
+
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .login-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 16px rgba(200, 146, 42, 0.4);
+    }
+
+    .login-brand-text {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.5px;
+    }
+
+    .login-brand-sub {
+      font-size: 11px;
+      color: var(--text3);
+      font-weight: 500;
+      margin-top: 1px;
+    }
+
+    .login-heading {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.8px;
+      margin-bottom: 6px;
+    }
+
+    .login-sub {
+      font-size: 13px;
+      color: var(--text3);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    .login-field {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .login-field input {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      font-size: 15px;
+      font-family: 'Sora', sans-serif;
+      outline: none;
+      color: var(--text);
+      text-align: center;
+      letter-spacing: 0.1em;
+      transition: var(--trans);
+    }
+
+    .login-field input:focus {
+      border-color: var(--gold2);
+      background: #fff;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--r);
+      border: none;
+      background: linear-gradient(135deg, var(--green2), var(--green));
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      letter-spacing: 0.01em;
+      box-shadow: 0 4px 16px rgba(46, 74, 30, 0.35);
+      transition: var(--trans);
+    }
+
+    .login-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(46, 74, 30, 0.45);
+    }
+
+    .login-err {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 10px;
+      display: none;
+      font-weight: 500;
+    }
+
+    /* ══════════════════════════════
    APP SHELL
 ══════════════════════════════ */
-.app{display:flex;flex-direction:column;min-height:100vh;}
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-/* ── TOPBAR ── */
-.topbar{background:var(--green);border-bottom:1px solid rgba(255,255,255,0.08);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.2);}
-.topbar-brand{display:flex;align-items:center;gap:12px;}
-.topbar-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--gold2),var(--gold));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 8px rgba(200,146,42,0.4);}
-.topbar-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.3px;}
-.topbar-tag{font-size:10px;color:rgba(255,255,255,0.4);font-weight:500;margin-left:6px;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:20px;}
-.topbar-right{display:flex;align-items:center;gap:6px;}
-.topbar-nav{display:flex;gap:2px;}
-.nav-btn{padding:7px 14px;border-radius:8px;border:none;background:transparent;color:rgba(255,255,255,0.45);font-size:12px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:var(--trans);white-space:nowrap;display:flex;align-items:center;gap:6px;}
-.nav-btn .nav-icon{font-size:13px;opacity:0.7;}
-.nav-btn.active{background:rgba(255,255,255,0.12);color:#fff;}
-.nav-btn.active .nav-icon{opacity:1;}
-.nav-btn:hover:not(.active){color:rgba(255,255,255,0.75);background:rgba(255,255,255,0.06);}
-.nav-badge{background:var(--gold2);color:var(--green);border-radius:10px;padding:1px 6px;font-size:9px;font-weight:800;margin-left:2px;display:none;}
-.topbar-sign-out{background:transparent;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:'Sora',sans-serif;transition:var(--trans);font-weight:500;}
-.topbar-sign-out:hover{color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.35);}
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--green);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0 28px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    }
 
-/* ── CONTENT ── */
-.content{flex:1;max-width:1080px;margin:0 auto;padding:28px 20px;width:100%;}
-.page{display:none;}
-.page.active{display:block;animation:fadeUp 0.22s ease;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-/* ── PAGE HEADER ── */
-.page-header{margin-bottom:24px;}
-.page-title{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-0.6px;}
-.page-sub{font-size:13px;color:var(--text3);margin-top:4px;font-weight:400;}
+    .topbar-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      box-shadow: 0 2px 8px rgba(200, 146, 42, 0.4);
+    }
 
-/* ══════════════════════════════
+    .topbar-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .topbar-tag {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 500;
+      margin-left: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topbar-nav {
+      display: flex;
+      gap: 2px;
+    }
+
+    .nav-btn {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: var(--trans);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn .nav-icon {
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    .nav-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .nav-btn.active .nav-icon {
+      opacity: 1;
+    }
+
+    .nav-btn:hover:not(.active) {
+      color: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-badge {
+      background: var(--gold2);
+      color: var(--green);
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-size: 9px;
+      font-weight: 800;
+      margin-left: 2px;
+      display: none;
+    }
+
+    .topbar-sign-out {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.4);
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: var(--trans);
+      font-weight: 500;
+    }
+
+    .topbar-sign-out:hover {
+      color: rgba(255, 255, 255, 0.8);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      flex: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 20px;
+      width: 100%;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeUp 0.22s ease;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.6px;
+    }
+
+    .page-sub {
+      font-size: 13px;
+      color: var(--text3);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    /* ══════════════════════════════
    CARDS
 ══════════════════════════════ */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px;box-shadow:var(--s1);transition:var(--trans);}
-.card-sm{padding:16px;}
-.card-accent{border-left:3px solid var(--gold2);}
-.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text4);margin-bottom:12px;}
-.divider{height:1px;background:var(--border);margin:18px 0;}
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px;
+      margin-bottom: 16px;
+      box-shadow: var(--s1);
+      transition: var(--trans);
+    }
 
-/* ══════════════════════════════
+    .card-sm {
+      padding: 16px;
+    }
+
+    .card-accent {
+      border-left: 3px solid var(--gold2);
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text4);
+      margin-bottom: 12px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 18px 0;
+    }
+
+    /* ══════════════════════════════
    FORM
 ══════════════════════════════ */
-label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px;}
-.inp{width:100%;padding:11px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r2);color:var(--text);font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:var(--trans);}
-.inp:focus{border-color:var(--gold2);background:#fff;box-shadow:0 0 0 3px var(--gold-t);}
-textarea.inp{resize:vertical;line-height:1.75;}
-select.inp{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A9068' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-.mb14{margin-bottom:14px;}
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text3);
+      margin-bottom: 6px;
+    }
 
-/* ── PLATFORM PILLS ── */
-.pills{display:flex;gap:6px;flex-wrap:wrap;}
-.pill{padding:8px 16px;border-radius:30px;border:1.5px solid var(--border2);background:var(--bg);color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;transition:var(--trans);font-family:'Sora',sans-serif;white-space:nowrap;}
-.pill.active{border-color:var(--gold2);background:var(--gold-t2);color:var(--green);font-weight:700;}
-.pill:hover:not(.active){border-color:var(--green3);color:var(--green2);background:var(--green-t);}
+    .inp {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: var(--trans);
+    }
 
-/* ── SERVICE TAGS ── */
-.tags{display:flex;flex-wrap:wrap;gap:6px;}
-.tag{padding:6px 13px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;transition:var(--trans);font-family:'Sora',sans-serif;}
-.tag.active{border-color:var(--green3);background:var(--green-t2);color:var(--green);font-weight:700;}
-.tag:hover:not(.active){border-color:var(--green3);color:var(--green2);}
-.tag-hint{font-size:11px;color:var(--text4);font-style:italic;margin-top:6px;}
+    .inp:focus {
+      border-color: var(--gold2);
+      background: #fff;
+      box-shadow: 0 0 0 3px var(--gold-t);
+    }
 
-/* ══════════════════════════════
+    textarea.inp {
+      resize: vertical;
+      line-height: 1.75;
+    }
+
+    select.inp {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A9068' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .mb14 {
+      margin-bottom: 14px;
+    }
+
+    /* ── PLATFORM PILLS ── */
+    .pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: 1.5px solid var(--border2);
+      background: var(--bg);
+      color: var(--text3);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--trans);
+      font-family: 'Sora', sans-serif;
+      white-space: nowrap;
+    }
+
+    .pill.active {
+      border-color: var(--gold2);
+      background: var(--gold-t2);
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .pill:hover:not(.active) {
+      border-color: var(--green3);
+      color: var(--green2);
+      background: var(--green-t);
+    }
+
+    /* ── SERVICE TAGS ── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      padding: 6px 13px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text3);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--trans);
+      font-family: 'Sora', sans-serif;
+    }
+
+    .tag.active {
+      border-color: var(--green3);
+      background: var(--green-t2);
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .tag:hover:not(.active) {
+      border-color: var(--green3);
+      color: var(--green2);
+    }
+
+    .tag-hint {
+      font-size: 11px;
+      color: var(--text4);
+      font-style: italic;
+      margin-top: 6px;
+    }
+
+    /* ══════════════════════════════
    BUTTONS
 ══════════════════════════════ */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border-radius:var(--r2);border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;transition:var(--trans);white-space:nowrap;}
-.btn-primary{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;box-shadow:0 3px 12px rgba(200,146,42,0.35);width:100%;padding:14px;}
-.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 20px rgba(200,146,42,0.45);}
-.btn-primary:disabled{background:var(--border2);color:var(--text4);cursor:not-allowed;transform:none;box-shadow:none;}
-.btn-dark{background:var(--green);color:#fff;box-shadow:0 3px 10px rgba(46,74,30,0.25);}
-.btn-dark:hover:not(:disabled){background:var(--green2);transform:translateY(-1px);}
-.btn-dark:disabled{background:var(--border2);color:var(--text4);cursor:not-allowed;transform:none;}
-.btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border2);}
-.btn-ghost:hover{border-color:var(--green3);color:var(--green);background:var(--green-t);}
-.btn-gold-outline{background:transparent;color:var(--gold);border:1.5px solid var(--gold2);}
-.btn-gold-outline:hover{background:var(--gold-t);color:var(--green);}
-.btn-sm{padding:6px 13px;font-size:11px;border-radius:6px;}
-.btn-icon{padding:8px;border-radius:8px;}
-.btn-danger{background:transparent;color:var(--red);border:1.5px solid #fecaca;}
-.btn-danger:hover{background:var(--red-bg);}
-.flex-btns{display:flex;gap:8px;flex-wrap:wrap;}
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 11px 20px;
+      border-radius: var(--r2);
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: var(--trans);
+      white-space: nowrap;
+    }
 
-/* ══════════════════════════════
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      color: #fff;
+      box-shadow: 0 3px 12px rgba(200, 146, 42, 0.35);
+      width: 100%;
+      padding: 14px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 20px rgba(200, 146, 42, 0.45);
+    }
+
+    .btn-primary:disabled {
+      background: var(--border2);
+      color: var(--text4);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-dark {
+      background: var(--green);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(46, 74, 30, 0.25);
+    }
+
+    .btn-dark:hover:not(:disabled) {
+      background: var(--green2);
+      transform: translateY(-1px);
+    }
+
+    .btn-dark:disabled {
+      background: var(--border2);
+      color: var(--text4);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border: 1.5px solid var(--border2);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green3);
+      color: var(--green);
+      background: var(--green-t);
+    }
+
+    .btn-gold-outline {
+      background: transparent;
+      color: var(--gold);
+      border: 1.5px solid var(--gold2);
+    }
+
+    .btn-gold-outline:hover {
+      background: var(--gold-t);
+      color: var(--green);
+    }
+
+    .btn-sm {
+      padding: 6px 13px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+
+    .btn-icon {
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1.5px solid #fecaca;
+    }
+
+    .btn-danger:hover {
+      background: var(--red-bg);
+    }
+
+    .flex-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ══════════════════════════════
    OUTPUT AREA
 ══════════════════════════════ */
-.output-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
-.output-wrap.solo{grid-template-columns:1fr;}
-.post-card{background:var(--bg2);border:2px solid var(--gold2);border-radius:var(--r);padding:20px;box-shadow:0 0 0 4px var(--gold-t);}
-.post-edit-area{width:100%;min-height:260px;padding:14px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r2);color:var(--text);font-family:'Sora',sans-serif;font-size:13.5px;line-height:1.85;resize:vertical;outline:none;transition:var(--trans);}
-.post-edit-area:focus{border-color:var(--gold2);background:#fff;}
-.char-cnt{font-size:11px;color:var(--text4);font-weight:500;}
-.char-over{color:var(--red)!important;}
-.img-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;}
-.img-placeholder{aspect-ratio:1;background:var(--bg3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:2px dashed var(--border2);}
-.spinner{width:32px;height:32px;border:2.5px solid var(--border2);border-top-color:var(--gold2);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.gen-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;}
-.img-prompt-box{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:none;}
-.img-prompt-text{font-size:11px;color:var(--text3);line-height:1.65;font-family:'JetBrains Mono',monospace;background:var(--bg3);padding:10px;border-radius:7px;}
-.no-key-box{background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+    .output-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
 
-/* ── PUBLISH BAR ── */
-.publish-bar{margin-top:14px;padding-top:14px;border-top:1.5px solid var(--border);}
-.publish-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-.plat-checks{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
-.plat-chk{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text3);margin-bottom:0;text-transform:none;letter-spacing:0;}
-.plat-chk input{width:14px;height:14px;accent-color:var(--green3);cursor:pointer;}
-.pub-status{display:none;margin-top:10px;padding:10px 14px;border-radius:var(--r2);font-size:12px;font-weight:600;line-height:1.5;}
-.pub-ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;}
-.pub-err{background:var(--red-bg);color:var(--red);border:1px solid #fecaca;}
-.pub-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
-.pub-info{background:var(--green-t);color:var(--green2);border:1px solid var(--border2);}
-.save-confirm{display:none;color:var(--green3);font-size:11px;font-weight:700;}
+    .output-wrap.solo {
+      grid-template-columns: 1fr;
+    }
 
-/* ══════════════════════════════
+    .post-card {
+      background: var(--bg2);
+      border: 2px solid var(--gold2);
+      border-radius: var(--r);
+      padding: 20px;
+      box-shadow: 0 0 0 4px var(--gold-t);
+    }
+
+    .post-edit-area {
+      width: 100%;
+      min-height: 260px;
+      padding: 14px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 13.5px;
+      line-height: 1.85;
+      resize: vertical;
+      outline: none;
+      transition: var(--trans);
+    }
+
+    .post-edit-area:focus {
+      border-color: var(--gold2);
+      background: #fff;
+    }
+
+    .char-cnt {
+      font-size: 11px;
+      color: var(--text4);
+      font-weight: 500;
+    }
+
+    .char-over {
+      color: var(--red) !important;
+    }
+
+    .img-card {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px;
+    }
+
+    .img-placeholder {
+      aspect-ratio: 1;
+      background: var(--bg3);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border: 2px dashed var(--border2);
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2.5px solid var(--border2);
+      border-top-color: var(--gold2);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .gen-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .img-prompt-box {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+
+    .img-prompt-text {
+      font-size: 11px;
+      color: var(--text3);
+      line-height: 1.65;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg3);
+      padding: 10px;
+      border-radius: 7px;
+    }
+
+    .no-key-box {
+      background: var(--bg3);
+      border: 1.5px solid var(--border2);
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    /* ── PUBLISH BAR ── */
+    .publish-bar {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1.5px solid var(--border);
+    }
+
+    .publish-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .plat-checks {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .plat-chk {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text3);
+      margin-bottom: 0;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .plat-chk input {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--green3);
+      cursor: pointer;
+    }
+
+    .pub-status {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: var(--r2);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .pub-ok {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .pub-err {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid #fecaca;
+    }
+
+    .pub-warn {
+      background: #fffbeb;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .pub-info {
+      background: var(--green-t);
+      color: var(--green2);
+      border: 1px solid var(--border2);
+    }
+
+    .save-confirm {
+      display: none;
+      color: var(--green3);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* ══════════════════════════════
    HISTORY
 ══════════════════════════════ */
-.hist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;}
-.hist-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:var(--trans);box-shadow:var(--s1);}
-.hist-card:hover{border-color:var(--gold2);box-shadow:var(--s2);transform:translateY(-2px);}
-.hist-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
-.hist-thumb-ph{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,var(--green-t2),var(--gold-t));display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--text4);}
-.hist-body{padding:14px;}
-.hist-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
-.chip{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
-.chip-green{background:var(--green-t2);color:var(--green2);}
-.chip-gold{background:var(--gold-t2);color:#7a4f10;}
-.chip-blue{background:#eff6ff;color:#1d4ed8;}
-.hist-text{font-size:12px;color:var(--text3);line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-.hist-footer{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;}
-.hist-time{font-size:10px;color:var(--text4);margin-top:6px;font-weight:500;}
+    .hist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 14px;
+    }
 
-/* ══════════════════════════════
+    .hist-card {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      transition: var(--trans);
+      box-shadow: var(--s1);
+    }
+
+    .hist-card:hover {
+      border-color: var(--gold2);
+      box-shadow: var(--s2);
+      transform: translateY(-2px);
+    }
+
+    .hist-thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hist-thumb-ph {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, var(--green-t2), var(--gold-t));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: var(--text4);
+    }
+
+    .hist-body {
+      padding: 14px;
+    }
+
+    .hist-chips {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .chip {
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .chip-green {
+      background: var(--green-t2);
+      color: var(--green2);
+    }
+
+    .chip-gold {
+      background: var(--gold-t2);
+      color: #7a4f10;
+    }
+
+    .chip-blue {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .hist-text {
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.65;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .hist-footer {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .hist-time {
+      font-size: 10px;
+      color: var(--text4);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* ══════════════════════════════
    CALENDAR
 ══════════════════════════════ */
-.cal-shell{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--s1);}
-.cal-top{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--green);border-bottom:1px solid rgba(255,255,255,0.08);}
-.cal-month-label{font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
-.cal-nav-btn{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:6px 14px;border-radius:7px;cursor:pointer;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;transition:var(--trans);}
-.cal-nav-btn:hover{background:rgba(255,255,255,0.18);}
-.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg3);border-bottom:1px solid var(--border);}
-.cal-dow span{padding:10px;text-align:center;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;}
-.cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
-.cal-cell{min-height:88px;padding:8px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;vertical-align:top;position:relative;}
-.cal-cell:nth-child(7n){border-right:none;}
-.cal-cell:hover{background:var(--bg3);}
-.cal-cell.today{background:var(--gold-t);}
-.cal-cell.today .cal-num{color:var(--gold2);font-weight:800;}
-.cal-cell.dim{opacity:0.3;}
-.cal-num{font-size:12px;font-weight:600;color:var(--text3);margin-bottom:4px;}
-.cal-evt{background:var(--green3);color:#fff;border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;margin-bottom:2px;cursor:pointer;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;}
-.cal-evt.sched{background:var(--gold2);}
-.cal-evt.posted{background:var(--green3);}
-.cal-legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;}
-.cal-leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-weight:500;}
-.cal-leg-dot{width:10px;height:10px;border-radius:3px;}
+    .cal-shell {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: var(--s1);
+    }
 
-/* ══════════════════════════════
+    .cal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--green);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .cal-month-label {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .cal-nav-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      transition: var(--trans);
+    }
+
+    .cal-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .cal-dow {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cal-dow span {
+      padding: 10px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .cal-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-cell {
+      min-height: 88px;
+      padding: 8px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.12s;
+      vertical-align: top;
+      position: relative;
+    }
+
+    .cal-cell:nth-child(7n) {
+      border-right: none;
+    }
+
+    .cal-cell:hover {
+      background: var(--bg3);
+    }
+
+    .cal-cell.today {
+      background: var(--gold-t);
+    }
+
+    .cal-cell.today .cal-num {
+      color: var(--gold2);
+      font-weight: 800;
+    }
+
+    .cal-cell.dim {
+      opacity: 0.3;
+    }
+
+    .cal-num {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+
+    .cal-evt {
+      background: var(--green3);
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 9px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      cursor: pointer;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.5;
+    }
+
+    .cal-evt.sched {
+      background: var(--gold2);
+    }
+
+    .cal-evt.posted {
+      background: var(--green3);
+    }
+
+    .cal-legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .cal-leg-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text3);
+      font-weight: 500;
+    }
+
+    .cal-leg-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    /* ══════════════════════════════
    MODAL
 ══════════════════════════════ */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
-.modal-bg.open{display:flex;animation:fadeIn .15s ease;}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal-box{background:var(--bg2);border-radius:16px;padding:28px;width:100%;max-width:500px;box-shadow:var(--s3);border:1px solid var(--border);}
-.modal-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:18px;letter-spacing:-0.4px;}
-.modal-status{display:none;margin-top:12px;padding:10px;border-radius:8px;font-size:12px;font-weight:600;}
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
 
-/* ══════════════════════════════
+    .modal-bg.open {
+      display: flex;
+      animation: fadeIn .15s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .modal-box {
+      background: var(--bg2);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--s3);
+      border: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 18px;
+      letter-spacing: -0.4px;
+    }
+
+    .modal-status {
+      display: none;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ══════════════════════════════
    TRENDING
 ══════════════════════════════ */
-.trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-.trend-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;transition:var(--trans);box-shadow:var(--s1);}
-.trend-card:hover{border-color:var(--gold2);box-shadow:var(--s2);}
-.trend-platform{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold2);margin-bottom:5px;}
-.trend-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.4;}
-.trend-why{font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:6px;}
-.trend-angle{font-size:11px;color:var(--green3);font-style:italic;margin-bottom:12px;padding:7px 10px;background:var(--green-t);border-radius:6px;}
-.news-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;transition:var(--trans);box-shadow:var(--s1);}
-.news-card:hover{border-color:var(--green3);}
-.news-date{font-size:10px;color:var(--text4);font-weight:600;margin-bottom:5px;}
-.news-hl{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.45;}
-.news-body{font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:5px;}
-.news-rel{font-size:11px;color:var(--gold2);font-style:italic;margin-bottom:10px;}
-.trend-use-btn{width:100%;padding:9px;border-radius:7px;border:1.5px solid var(--gold2);background:var(--gold-t);color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;transition:var(--trans);}
-.trend-use-btn:hover{background:var(--gold2);color:#fff;}
-.load-state{text-align:center;padding:40px 20px;color:var(--text4);}
-.load-state .spinner{margin:0 auto 12px;border-top-color:var(--green3);}
+    .trend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
 
-/* ══════════════════════════════
+    .trend-card {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: var(--trans);
+      box-shadow: var(--s1);
+    }
+
+    .trend-card:hover {
+      border-color: var(--gold2);
+      box-shadow: var(--s2);
+    }
+
+    .trend-platform {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold2);
+      margin-bottom: 5px;
+    }
+
+    .trend-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .trend-why {
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    .trend-angle {
+      font-size: 11px;
+      color: var(--green3);
+      font-style: italic;
+      margin-bottom: 12px;
+      padding: 7px 10px;
+      background: var(--green-t);
+      border-radius: 6px;
+    }
+
+    .news-card {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: var(--trans);
+      box-shadow: var(--s1);
+    }
+
+    .news-card:hover {
+      border-color: var(--green3);
+    }
+
+    .news-date {
+      font-size: 10px;
+      color: var(--text4);
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .news-hl {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.45;
+    }
+
+    .news-body {
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.6;
+      margin-bottom: 5px;
+    }
+
+    .news-rel {
+      font-size: 11px;
+      color: var(--gold2);
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+
+    .trend-use-btn {
+      width: 100%;
+      padding: 9px;
+      border-radius: 7px;
+      border: 1.5px solid var(--gold2);
+      background: var(--gold-t);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: var(--trans);
+    }
+
+    .trend-use-btn:hover {
+      background: var(--gold2);
+      color: #fff;
+    }
+
+    .load-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text4);
+    }
+
+    .load-state .spinner {
+      margin: 0 auto 12px;
+      border-top-color: var(--green3);
+    }
+
+    /* ══════════════════════════════
    RESEARCH
 ══════════════════════════════ */
-.research-results{margin-top:16px;}
-.res-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;transition:var(--trans);}
-.res-card:hover{border-color:var(--green3);}
-.res-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px;}
-.res-body{font-size:12px;color:var(--text3);line-height:1.65;margin-bottom:10px;}
-.res-actions{display:flex;gap:7px;}
+    .research-results {
+      margin-top: 16px;
+    }
 
-/* ══════════════════════════════
+    .res-card {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 10px;
+      transition: var(--trans);
+    }
+
+    .res-card:hover {
+      border-color: var(--green3);
+    }
+
+    .res-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .res-body {
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.65;
+      margin-bottom: 10px;
+    }
+
+    .res-actions {
+      display: flex;
+      gap: 7px;
+    }
+
+    /* ══════════════════════════════
    SETTINGS
 ══════════════════════════════ */
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.settings-section{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--s1);}
-.settings-section.full{grid-column:1/-1;}
-.setting-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
-.setting-sub{font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.5;}
-.key-field{position:relative;}
-.key-field input{padding-right:60px;}
-.key-reveal{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:11px;font-weight:600;font-family:'Sora',sans-serif;}
-.key-saved{font-size:11px;color:var(--green3);margin-top:6px;font-weight:600;display:none;}
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
 
-/* ── PROMPT BOX ── */
-.prompt-code{font-size:10.5px;color:var(--text3);line-height:1.8;white-space:pre-wrap;font-family:'JetBrains Mono',monospace;background:var(--bg3);padding:18px;border-radius:9px;border:1px solid var(--border);max-height:500px;overflow-y:auto;}
+    .settings-section {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px;
+      box-shadow: var(--s1);
+    }
 
-/* ══════════════════════════════
+    .settings-section.full {
+      grid-column: 1/-1;
+    }
+
+    .setting-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .key-field {
+      position: relative;
+    }
+
+    .key-field input {
+      padding-right: 60px;
+    }
+
+    .key-reveal {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'Sora', sans-serif;
+    }
+
+    .key-saved {
+      font-size: 11px;
+      color: var(--green3);
+      margin-top: 6px;
+      font-weight: 600;
+      display: none;
+    }
+
+    /* ── PROMPT BOX ── */
+    .prompt-code {
+      font-size: 10.5px;
+      color: var(--text3);
+      line-height: 1.8;
+      white-space: pre-wrap;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg3);
+      padding: 18px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    /* ══════════════════════════════
    EMPTY STATE
 ══════════════════════════════ */
-.empty{text-align:center;padding:60px 20px;color:var(--text4);}
-.empty-emoji{font-size:48px;margin-bottom:14px;opacity:0.4;}
-.empty-title{font-size:14px;font-weight:600;color:var(--text3);margin-bottom:6px;}
-.empty-sub{font-size:12px;line-height:1.6;}
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text4);
+    }
 
-/* ══════════════════════════════
+    .empty-emoji {
+      font-size: 48px;
+      margin-bottom: 14px;
+      opacity: 0.4;
+    }
+
+    .empty-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text3);
+      margin-bottom: 6px;
+    }
+
+    .empty-sub {
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* ══════════════════════════════
    ERROR
 ══════════════════════════════ */
-.err-box{background:var(--red-bg);border:1px solid #fecaca;border-radius:var(--r2);padding:13px 16px;color:var(--red);font-size:13px;margin-bottom:14px;}
+    .err-box {
+      background: var(--red-bg);
+      border: 1px solid #fecaca;
+      border-radius: var(--r2);
+      padding: 13px 16px;
+      color: var(--red);
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
 
-/* ══════════════════════════════
+    /* ══════════════════════════════
    RESPONSIVE
 ══════════════════════════════ */
-@media(max-width:720px){
-  .topbar{padding:0 14px;height:54px;}
-  .topbar-nav{overflow-x:auto;gap:1px;}
-  .nav-btn{padding:6px 10px;font-size:11px;}
-  .content{padding:16px 12px;}
-  .g2,.g3,.output-wrap,.trend-grid,.settings-grid{grid-template-columns:1fr;}
-  .hist-grid{grid-template-columns:1fr;}
-  .cal-body,.cal-dow{grid-template-columns:repeat(7,1fr);}
-  .cal-cell{min-height:56px;padding:4px;}
-}
-</style>
+    @media(max-width:720px) {
+      .topbar {
+        padding: 0 14px;
+        height: 54px;
+      }
+
+      .topbar-nav {
+        overflow-x: auto;
+        gap: 1px;
+      }
+
+      .nav-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+
+      .content {
+        padding: 16px 12px;
+      }
+
+      .g2,
+      .g3,
+      .output-wrap,
+      .trend-grid,
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hist-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cal-body,
+      .cal-dow {
+        grid-template-columns: repeat(7, 1fr);
+      }
+
+      .cal-cell {
+        min-height: 56px;
+        padding: 4px;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ══ LOGIN ══ -->
-<div class="login-wrap" id="loginWrap">
-  <div class="login-card">
-    <div class="login-brand">
-      <div class="login-icon">🏠</div>
-      <div>
-        <div class="login-brand-text">S2F Content Studio</div>
-        <div class="login-brand-sub">S2F Property Services Ltd</div>
+  <!-- ══ LOGIN ══ -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-icon">🏠</div>
+        <div>
+          <div class="login-brand-text">S2F Content Studio</div>
+          <div class="login-brand-sub">S2F Property Services Ltd</div>
+        </div>
       </div>
-    </div>
-    <div class="login-heading">Welcome back</div>
-    <div class="login-sub">Enter your password to access the dashboard.</div>
-    <div class="login-field">
-      <input type="password" id="loginPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="login-btn" onclick="doLogin()">Sign In →</button>
-    <div class="login-err" id="loginErr">Incorrect password. Please try again.</div>
-  </div>
-</div>
-
-<!-- ══ APP ══ -->
-<div class="app">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-brand">
-      <div class="topbar-icon">🏠</div>
-      <span class="topbar-name">S2F Content Studio</span>
-    </div>
-    <div class="topbar-right">
-      <div class="topbar-nav">
-        <button class="nav-btn active" id="tab-gen" onclick="showPage('gen')"><span class="nav-icon">✨</span>Generate</button>
-        <button class="nav-btn" id="tab-research" onclick="showPage('research')"><span class="nav-icon">🔍</span>Research</button>
-        <button class="nav-btn" id="tab-hist" onclick="showPage('hist')"><span class="nav-icon">📋</span>History<span class="nav-badge" id="histBadge"></span></button>
-        <button class="nav-btn" id="tab-cal" onclick="showPage('cal')"><span class="nav-icon">📅</span>Schedule</button>
-        <button class="nav-btn" id="tab-trend" onclick="showPage('trend')"><span class="nav-icon">🔥</span>Trending</button>
-        <button class="nav-btn" id="tab-settings" onclick="showPage('settings')"><span class="nav-icon">⚙️</span>Settings</button>
+      <div class="login-heading">Welcome back</div>
+      <div class="login-sub">Enter your password to access the dashboard.</div>
+      <div class="login-field">
+        <input type="password" id="loginPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-      <span class="topbar-tag" style="margin-right:8px;">AI-Powered</span>
-      <button class="topbar-sign-out" onclick="doLogout()">Sign out</button>
+      <button class="login-btn" onclick="doLogin()">Sign In →</button>
+      <div class="login-err" id="loginErr">Incorrect password. Please try again.</div>
     </div>
   </div>
 
-  <div class="content">
+  <!-- ══ APP ══ -->
+  <div class="app">
 
-  <!-- ══ GENERATE ══ -->
-  <div id="page-gen" class="page active">
-    <div class="page-header">
-      <div class="page-title">Generate Post</div>
-      <div class="page-sub">Create AI-powered social media content for S2F Property Services</div>
-    </div>
-
-    <div class="card mb14">
-      <div class="section-label">Platform</div>
-      <div class="pills" id="platPills">
-        <button class="pill active" onclick="setPlatform('LinkedIn',this)">💼 LinkedIn</button>
-        <button class="pill" onclick="setPlatform('Instagram',this)">📸 Instagram</button>
-        <button class="pill" onclick="setPlatform('Facebook',this)">👥 Facebook</button>
-        <button class="pill" onclick="setPlatform('X (Twitter)',this)">𝕏 Twitter</button>
-        <button class="pill" onclick="setPlatform('TikTok',this)">🎵 TikTok</button>
-        <button class="pill" onclick="setPlatform('All Platforms',this)">🌐 All Platforms</button>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-brand">
+        <div class="topbar-icon">🏠</div>
+        <span class="topbar-name">S2F Content Studio</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-nav">
+          <button class="nav-btn active" id="tab-gen" onclick="showPage('gen')"><span
+              class="nav-icon">✨</span>Generate</button>
+          <button class="nav-btn" id="tab-research" onclick="showPage('research')"><span
+              class="nav-icon">🔍</span>Research</button>
+          <button class="nav-btn" id="tab-hist" onclick="showPage('hist')"><span class="nav-icon">📋</span>History<span
+              class="nav-badge" id="histBadge"></span></button>
+          <button class="nav-btn" id="tab-cal" onclick="showPage('cal')"><span
+              class="nav-icon">📅</span>Schedule</button>
+          <button class="nav-btn" id="tab-trend" onclick="showPage('trend')"><span
+              class="nav-icon">🔥</span>Trending</button>
+          <button class="nav-btn" id="tab-settings" onclick="showPage('settings')"><span
+              class="nav-icon">⚙️</span>Settings</button>
+        </div>
+        <span class="topbar-tag" style="margin-right:8px;">AI-Powered</span>
+        <button class="topbar-sign-out" onclick="doLogout()">Sign out</button>
       </div>
     </div>
 
-    <div class="card mb14">
-      <div class="g2 mb14">
-        <div>
-          <label>Content Pillar</label>
-          <select class="inp" id="pillarSel">
-            <option value="Pain Point">⚠️ Pain Point</option>
-            <option value="Education">📚 Education</option>
-            <option value="Service Spotlight">📋 Service Spotlight</option>
-            <option value="Industry Insight">💡 Industry Insight</option>
-            <option value="Trust / Behind the Scenes">🤝 Trust / Behind the Scenes</option>
-            <option value="Hot Take / Opinion">🔥 Hot Take / Opinion</option>
-          </select>
-        </div>
-        <div>
-          <label>Tone Boost</label>
-          <select class="inp" id="toneSel">
-            <option value="">— Auto —</option>
-            <option value="urgent and alarming">🚨 Urgent / Alarming</option>
-            <option value="warm and story-driven">💛 Warm / Story-driven</option>
-            <option value="bold and controversial">🔥 Bold / Controversial</option>
-            <option value="data-led and authoritative">📊 Data-led</option>
-            <option value="humorous and relatable">😄 Humorous</option>
-            <option value="inspirational and motivating">⭐ Inspirational</option>
-          </select>
-        </div>
-      </div>
-      <div class="mb14">
-        <label>Service / Topic Focus <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text4);font-size:10px;">— optional, click to toggle</span></label>
-        <div class="tags" id="serviceTags">
-          <button class="tag" onclick="toggleSvc('Inventory Reports',this)">Inventory Reports</button>
-          <button class="tag" onclick="toggleSvc('Inventory Check-In',this)">Check-In Reports</button>
-          <button class="tag" onclick="toggleSvc('Check-Outs',this)">Check-Outs</button>
-          <button class="tag" onclick="toggleSvc('Mid-Term Inspections',this)">Mid-Term Inspections</button>
-          <button class="tag" onclick="toggleSvc('Block Inspections',this)">Block Inspections</button>
-          <button class="tag" onclick="toggleSvc('Vacant Property Inspections',this)">Vacant Inspections</button>
-          <button class="tag" onclick="toggleSvc('Property Viewings',this)">Viewings</button>
-          <button class="tag" onclick="toggleSvc('360 Virtual Tours',this)">360 Tours</button>
-          <button class="tag" onclick="toggleSvc('EPCs and Floor Plans',this)">EPCs & Floor Plans</button>
-          <button class="tag" onclick="toggleSvc('End-of-Tenancy Cleaning',this)">EOT Cleaning</button>
-          <button class="tag" onclick="toggleSvc('Health and Safety Reports',this)">Health &amp; Safety</button>
-          <button class="tag" onclick="toggleSvc('Legionella and Fire Risk',this)">Legionella / Fire Risk</button>
-          <button class="tag" onclick="toggleSvc('Council and Local Authority Reports',this)">Council Reports</button>
-          <button class="tag" onclick="toggleSvc('General Brand',this)">General Brand</button>
-          <button class="tag" onclick="toggleSvc('UK Property Compliance',this)">UK Compliance</button>
-        </div>
-        <div class="tag-hint">Nothing selected = AI chooses the best angle &nbsp;·&nbsp; Click multiple to combine</div>
-      </div>
-      <div style="margin-bottom:14px;">
-        <label>Area Hashtags <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text4);font-size:10px;">— select as many areas as you like</span></label>
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <select class="inp" id="areaDropdown" style="flex:1;" onchange="addArea(this)">
-            <option value="">— Add an area —</option>
-            <optgroup label="London">
-              <option value="London|#London #LondonProperty #LondonLettings #LondonRental">London (all)</option>
-              <option value="EastLondon|#EastLondon #EastLondonProperty #EastLondonLettings">East London</option>
-              <option value="NorthLondon|#NorthLondon #NorthLondonProperty #NorthLondonLettings">North London</option>
-              <option value="SouthLondon|#SouthLondon #SouthLondonProperty #SouthLondonLettings">South London</option>
-              <option value="WestLondon|#WestLondon #WestLondonProperty #WestLondonLettings">West London</option>
-              <option value="CentralLondon|#CentralLondon #CentralLondonProperty #CityOfLondon">Central London</option>
-            </optgroup>
-            <optgroup label="North West">
-              <option value="Manchester|#Manchester #ManchesterProperty #ManchesterLettings #GreaterManchester">Manchester</option>
-              <option value="Liverpool|#Liverpool #LiverpoolProperty #LiverpoolLettings #Merseyside">Liverpool</option>
-              <option value="Chester|#Chester #ChesterProperty #CheshireLettings">Chester</option>
-              <option value="Preston|#Preston #LancashireProperty #PrestonLettings">Preston</option>
-              <option value="Blackpool|#Blackpool #BlackpoolProperty #LancashireLettings">Blackpool</option>
-              <option value="Salford|#Salford #SalfordProperty #GreaterManchesterLettings">Salford</option>
-            </optgroup>
-            <optgroup label="Yorkshire & Humber">
-              <option value="Leeds|#Leeds #LeedsProperty #LeedsLettings #WestYorkshire">Leeds</option>
-              <option value="Sheffield|#Sheffield #SheffieldProperty #SheffieldLettings #SouthYorkshire">Sheffield</option>
-              <option value="Bradford|#Bradford #BradfordProperty #WestYorkshireLettings">Bradford</option>
-              <option value="Hull|#Hull #HullProperty #EastYorkshireLettings #KingstonUponHull">Hull</option>
-              <option value="York|#York #YorkProperty #NorthYorkshireLettings">York</option>
-              <option value="Huddersfield|#Huddersfield #HuddersfieldProperty #WestYorkshire">Huddersfield</option>
-            </optgroup>
-            <optgroup label="Midlands">
-              <option value="Birmingham|#Birmingham #BirminghamProperty #BirminghamLettings #WestMidlands">Birmingham</option>
-              <option value="Coventry|#Coventry #CoventryProperty #WestMidlandsLettings">Coventry</option>
-              <option value="Nottingham|#Nottingham #NottinghamProperty #NottinghamLettings">Nottingham</option>
-              <option value="Leicester|#Leicester #LeicesterProperty #LeicesterLettings">Leicester</option>
-              <option value="Derby|#Derby #DerbyProperty #DerbyshireLettings">Derby</option>
-              <option value="Wolverhampton|#Wolverhampton #WolverhamptonProperty #BlackCountry">Wolverhampton</option>
-              <option value="Stoke|#StokeonTrent #StokeProperty #StaffordshireLettings">Stoke-on-Trent</option>
-              <option value="Northampton|#Northampton #NorthamptonProperty #NorthamptonshireLettings">Northampton</option>
-            </optgroup>
-            <optgroup label="South East">
-              <option value="Reading|#Reading #ReadingProperty #Crowthorne #BerkshireProperty">Reading / Crowthorne</option>
-              <option value="Brighton|#Brighton #BrightonProperty #BrightonLettings #EastSussex">Brighton</option>
-              <option value="Oxford|#Oxford #OxfordProperty #OxfordshireLettings">Oxford</option>
-              <option value="Southampton|#Southampton #SouthamptonProperty #HampshireLettings">Southampton</option>
-              <option value="Portsmouth|#Portsmouth #PortsmouthProperty #HampshireLettings">Portsmouth</option>
-              <option value="Milton Keynes|#MiltonKeynes #MiltonKeynesProperty #BuckinghamshireLettings">Milton Keynes</option>
-              <option value="Guildford|#Guildford #GuildfordProperty #SurreyLettings">Guildford</option>
-              <option value="Canterbury|#Canterbury #CanterburyProperty #KentLettings">Canterbury</option>
-              <option value="Maidstone|#Maidstone #MaidstoneProperty #KentProperty">Maidstone</option>
-              <option value="Slough|#Slough #SloughProperty #BerkshireLettings">Slough</option>
-            </optgroup>
-            <optgroup label="South West">
-              <option value="Bristol|#Bristol #BristolProperty #BristolLettings">Bristol</option>
-              <option value="Bournemouth|#Bournemouth #BournemouthProperty #DorsetLettings #BCP">Bournemouth</option>
-              <option value="Plymouth|#Plymouth #PlymouthProperty #DevonLettings">Plymouth</option>
-              <option value="Exeter|#Exeter #ExeterProperty #DevonProperty">Exeter</option>
-              <option value="Bath|#Bath #BathProperty #SomersetLettings #BANES">Bath</option>
-              <option value="Swindon|#Swindon #SwindonProperty #WiltshireLettings">Swindon</option>
-              <option value="Gloucester|#Gloucester #GloucesterProperty #GloucestershireLettings">Gloucester</option>
-              <option value="Cheltenham|#Cheltenham #CheltenhamProperty #GloucestershireLettings">Cheltenham</option>
-            </optgroup>
-            <optgroup label="East of England">
-              <option value="Cambridge|#Cambridge #CambridgeProperty #CambridgeshireLettings">Cambridge</option>
-              <option value="Norwich|#Norwich #NorwichProperty #NorfolkLettings">Norwich</option>
-              <option value="Ipswich|#Ipswich #IpswichProperty #SuffolkLettings">Ipswich</option>
-              <option value="Luton|#Luton #LutonProperty #BedfordshireLettings">Luton</option>
-              <option value="Peterborough|#Peterborough #PeterboroughProperty #CambridgeshireLettings">Peterborough</option>
-              <option value="Colchester|#Colchester #ColchesterProperty #EssexLettings">Colchester</option>
-              <option value="Chelmsford|#Chelmsford #ChelmsfordProperty #EssexProperty">Chelmsford</option>
-              <option value="Southend|#Southend #SouthendOnSea #EssexLettings">Southend-on-Sea</option>
-            </optgroup>
-            <optgroup label="North East">
-              <option value="Newcastle|#Newcastle #NewcastleProperty #NewcastleLettings #Tyneside">Newcastle</option>
-              <option value="Sunderland|#Sunderland #SunderlandProperty #WearSideLettings">Sunderland</option>
-              <option value="Middlesbrough|#Middlesbrough #MiddlesbroughProperty #TeessideLettings">Middlesbrough</option>
-              <option value="Durham|#Durham #DurhamProperty #CountyDurhamLettings">Durham</option>
-            </optgroup>
-            <optgroup label="Scotland">
-              <option value="Glasgow|#Glasgow #GlasgowProperty #GlasgowLettings #Scotland">Glasgow</option>
-              <option value="Edinburgh|#Edinburgh #EdinburghProperty #EdinburghLettings #Scotland">Edinburgh</option>
-              <option value="Aberdeen|#Aberdeen #AberdeenProperty #ScotlandLettings">Aberdeen</option>
-              <option value="Dundee|#Dundee #DundeeProperty #ScotlandLettings">Dundee</option>
-            </optgroup>
-            <optgroup label="Wales">
-              <option value="Cardiff|#Cardiff #CardiffProperty #CardiffLettings #Wales">Cardiff</option>
-              <option value="Swansea|#Swansea #SwanseaProperty #WalesLettings">Swansea</option>
-              <option value="Newport|#Newport #NewportProperty #WalesLettings">Newport</option>
-            </optgroup>
-            <optgroup label="Northern Ireland">
-              <option value="Belfast|#Belfast #BelfastProperty #BelfastLettings #NorthernIreland">Belfast</option>
-            </optgroup>
-          </select>
-        </div>
-        <div id="selectedAreas" style="display:flex;flex-wrap:wrap;gap:6px;min-height:26px;">
-          <span id="areaPlaceholder" style="font-size:11px;color:var(--text4);font-style:italic;line-height:26px;">No areas selected — post will have no location hashtags</span>
-        </div>
-      </div>
-      <div class="mb14">
-        <label>Extra Context or Angle</label>
-        <input type="text" class="inp" id="extraCtx" placeholder="e.g. landlords losing deposit disputes, EPC 2030 deadline">
-      </div>
-    </div>
+    <div class="content">
 
-    <button class="btn btn-primary" id="genBtn" onclick="generatePost()">✨ Generate Post + Image</button>
+      <!-- ══ GENERATE ══ -->
+      <div id="page-gen" class="page active">
+        <div class="page-header">
+          <div class="page-title">Generate Post</div>
+          <div class="page-sub">Create AI-powered social media content for S2F Property Services</div>
+        </div>
 
-    <div id="errPanel" style="display:none;margin-top:14px;">
-      <div class="err-box" style="margin-bottom:0;border-radius:var(--r2) var(--r2) 0 0;border-bottom:none;padding-bottom:10px;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-          <div>
-            <div style="font-weight:700;margin-bottom:4px;">⚠️ Something went wrong</div>
-            <div id="errMsg" style="font-size:12px;line-height:1.6;"></div>
+        <div class="card mb14">
+          <div class="section-label">Platform</div>
+          <div class="pills" id="platPills">
+            <button class="pill active" onclick="setPlatform('LinkedIn',this)">💼 LinkedIn</button>
+            <button class="pill" onclick="setPlatform('Instagram',this)">📸 Instagram</button>
+            <button class="pill" onclick="setPlatform('Facebook',this)">👥 Facebook</button>
+            <button class="pill" onclick="setPlatform('X (Twitter)',this)">𝕏 Twitter</button>
+            <button class="pill" onclick="setPlatform('TikTok',this)">🎵 TikTok</button>
+            <button class="pill" onclick="setPlatform('All Platforms',this)">🌐 All Platforms</button>
           </div>
-          <button onclick="closeErrPanel()" style="background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;line-height:1;flex-shrink:0;opacity:0.6;" title="Dismiss">×</button>
         </div>
-      </div>
-      <div style="background:#fff5f5;border:1px solid #fecaca;border-top:1px solid #ffd5d5;border-radius:0 0 var(--r2) var(--r2);padding:14px 16px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9b2c2c;margin-bottom:10px;">🛟 Get Support</div>
-        <div style="font-size:12px;color:#7f1d1d;margin-bottom:12px;line-height:1.6;">Need help? Send this error to the support team and we'll get it fixed. The error details are pre-filled below — just add a note if you like and hit send.</div>
-        <div style="margin-bottom:10px;">
-          <label style="color:#9b2c2c;">Your message <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional — add any extra context)</span></label>
-          <textarea id="errNote" class="inp" rows="2" placeholder="e.g. I was trying to generate a LinkedIn post about inventory reports when this happened..." style="font-size:12px;border-color:#fecaca;"></textarea>
-        </div>
-        <button onclick="sendErrEmail()" class="btn" style="background:var(--red);color:#fff;padding:10px 20px;font-size:12px;box-shadow:0 2px 8px rgba(192,57,43,0.3);">📧 Send Error Report</button>
-        <div id="errSentMsg" style="display:none;margin-top:8px;font-size:12px;font-weight:600;color:#166534;background:#f0fdf4;padding:8px 12px;border-radius:6px;border:1px solid #bbf7d0;">✓ Error report sent — we'll look into it shortly.</div>
-      </div>
-    </div>
 
-    <div id="outputArea" style="display:none;margin-top:16px;">
-      <div id="outputWrap" class="output-wrap solo">
-
-        <!-- Post -->
-        <div class="post-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold2);">✏️ Your Post — edit freely</span>
-            <div class="flex-btns">
-              <button class="btn btn-ghost btn-sm" onclick="copyPost()" id="copyBtn">📋 Copy</button>
-              <button class="btn btn-ghost btn-sm" onclick="rewritePost()" id="rewriteBtn">🔄 Rewrite</button>
+        <div class="card mb14">
+          <div class="g2 mb14">
+            <div>
+              <label>Content Pillar</label>
+              <select class="inp" id="pillarSel">
+                <option value="Pain Point">⚠️ Pain Point</option>
+                <option value="Education">📚 Education</option>
+                <option value="Service Spotlight">📋 Service Spotlight</option>
+                <option value="Industry Insight">💡 Industry Insight</option>
+                <option value="Trust / Behind the Scenes">🤝 Trust / Behind the Scenes</option>
+                <option value="Hot Take / Opinion">🔥 Hot Take / Opinion</option>
+              </select>
+            </div>
+            <div>
+              <label>Tone Boost</label>
+              <select class="inp" id="toneSel">
+                <option value="">— Auto —</option>
+                <option value="urgent and alarming">🚨 Urgent / Alarming</option>
+                <option value="warm and story-driven">💛 Warm / Story-driven</option>
+                <option value="bold and controversial">🔥 Bold / Controversial</option>
+                <option value="data-led and authoritative">📊 Data-led</option>
+                <option value="humorous and relatable">😄 Humorous</option>
+                <option value="inspirational and motivating">⭐ Inspirational</option>
+              </select>
             </div>
           </div>
-          <textarea class="post-edit-area" id="postEdit" oninput="updateCharCnt()"></textarea>
-          <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
-            <button class="btn btn-ghost btn-sm" onclick="saveToHist()">💾 Save to History</button>
-            <span class="save-confirm" id="saveConf">✓ Saved!</span>
-            <span class="char-cnt" id="charCnt" style="margin-left:auto;"></span>
+          <div class="mb14">
+            <label>Service / Topic Focus <span
+                style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text4);font-size:10px;">—
+                optional, click to toggle</span></label>
+            <div class="tags" id="serviceTags">
+              <button class="tag" onclick="toggleSvc('Inventory Reports',this)">Inventory Reports</button>
+              <button class="tag" onclick="toggleSvc('Inventory Check-In',this)">Check-In Reports</button>
+              <button class="tag" onclick="toggleSvc('Check-Outs',this)">Check-Outs</button>
+              <button class="tag" onclick="toggleSvc('Mid-Term Inspections',this)">Mid-Term Inspections</button>
+              <button class="tag" onclick="toggleSvc('Block Inspections',this)">Block Inspections</button>
+              <button class="tag" onclick="toggleSvc('Vacant Property Inspections',this)">Vacant Inspections</button>
+              <button class="tag" onclick="toggleSvc('Property Viewings',this)">Viewings</button>
+              <button class="tag" onclick="toggleSvc('360 Virtual Tours',this)">360 Tours</button>
+              <button class="tag" onclick="toggleSvc('EPCs and Floor Plans',this)">EPCs & Floor Plans</button>
+              <button class="tag" onclick="toggleSvc('End-of-Tenancy Cleaning',this)">EOT Cleaning</button>
+              <button class="tag" onclick="toggleSvc('Health and Safety Reports',this)">Health &amp; Safety</button>
+              <button class="tag" onclick="toggleSvc('Legionella and Fire Risk',this)">Legionella / Fire Risk</button>
+              <button class="tag" onclick="toggleSvc('Council and Local Authority Reports',this)">Council
+                Reports</button>
+              <button class="tag" onclick="toggleSvc('General Brand',this)">General Brand</button>
+              <button class="tag" onclick="toggleSvc('UK Property Compliance',this)">UK Compliance</button>
+            </div>
+            <div class="tag-hint">Nothing selected = AI chooses the best angle &nbsp;·&nbsp; Click multiple to combine
+            </div>
           </div>
-
-          <!-- PUBLISH -->
-          <div class="publish-bar">
-            <div class="publish-label">🚀 Publish via n8n + Blotato</div>
-            <div class="plat-checks">
-              <label class="plat-chk"><input type="checkbox" id="p_li" checked> 💼 LinkedIn</label>
-              <label class="plat-chk"><input type="checkbox" id="p_ig" checked> 📸 Instagram</label>
-              <label class="plat-chk"><input type="checkbox" id="p_fb" checked> 👥 Facebook</label>
-              <label class="plat-chk"><input type="checkbox" id="p_tt"> 🎵 TikTok</label>
-              <label class="plat-chk"><input type="checkbox" id="p_x"> 𝕏 Twitter</label>
+          <div style="margin-bottom:14px;">
+            <label>Area Hashtags <span
+                style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text4);font-size:10px;">— select
+                as many areas as you like</span></label>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <select class="inp" id="areaDropdown" style="flex:1;" onchange="addArea(this)">
+                <option value="">— Add an area —</option>
+                <optgroup label="London">
+                  <option value="London|#London #LondonProperty #LondonLettings #LondonRental">London (all)</option>
+                  <option value="EastLondon|#EastLondon #EastLondonProperty #EastLondonLettings">East London</option>
+                  <option value="NorthLondon|#NorthLondon #NorthLondonProperty #NorthLondonLettings">North London
+                  </option>
+                  <option value="SouthLondon|#SouthLondon #SouthLondonProperty #SouthLondonLettings">South London
+                  </option>
+                  <option value="WestLondon|#WestLondon #WestLondonProperty #WestLondonLettings">West London</option>
+                  <option value="CentralLondon|#CentralLondon #CentralLondonProperty #CityOfLondon">Central London
+                  </option>
+                </optgroup>
+                <optgroup label="North West">
+                  <option value="Manchester|#Manchester #ManchesterProperty #ManchesterLettings #GreaterManchester">
+                    Manchester</option>
+                  <option value="Liverpool|#Liverpool #LiverpoolProperty #LiverpoolLettings #Merseyside">Liverpool
+                  </option>
+                  <option value="Chester|#Chester #ChesterProperty #CheshireLettings">Chester</option>
+                  <option value="Preston|#Preston #LancashireProperty #PrestonLettings">Preston</option>
+                  <option value="Blackpool|#Blackpool #BlackpoolProperty #LancashireLettings">Blackpool</option>
+                  <option value="Salford|#Salford #SalfordProperty #GreaterManchesterLettings">Salford</option>
+                </optgroup>
+                <optgroup label="Yorkshire & Humber">
+                  <option value="Leeds|#Leeds #LeedsProperty #LeedsLettings #WestYorkshire">Leeds</option>
+                  <option value="Sheffield|#Sheffield #SheffieldProperty #SheffieldLettings #SouthYorkshire">Sheffield
+                  </option>
+                  <option value="Bradford|#Bradford #BradfordProperty #WestYorkshireLettings">Bradford</option>
+                  <option value="Hull|#Hull #HullProperty #EastYorkshireLettings #KingstonUponHull">Hull</option>
+                  <option value="York|#York #YorkProperty #NorthYorkshireLettings">York</option>
+                  <option value="Huddersfield|#Huddersfield #HuddersfieldProperty #WestYorkshire">Huddersfield</option>
+                </optgroup>
+                <optgroup label="Midlands">
+                  <option value="Birmingham|#Birmingham #BirminghamProperty #BirminghamLettings #WestMidlands">
+                    Birmingham</option>
+                  <option value="Coventry|#Coventry #CoventryProperty #WestMidlandsLettings">Coventry</option>
+                  <option value="Nottingham|#Nottingham #NottinghamProperty #NottinghamLettings">Nottingham</option>
+                  <option value="Leicester|#Leicester #LeicesterProperty #LeicesterLettings">Leicester</option>
+                  <option value="Derby|#Derby #DerbyProperty #DerbyshireLettings">Derby</option>
+                  <option value="Wolverhampton|#Wolverhampton #WolverhamptonProperty #BlackCountry">Wolverhampton
+                  </option>
+                  <option value="Stoke|#StokeonTrent #StokeProperty #StaffordshireLettings">Stoke-on-Trent</option>
+                  <option value="Northampton|#Northampton #NorthamptonProperty #NorthamptonshireLettings">Northampton
+                  </option>
+                </optgroup>
+                <optgroup label="South East">
+                  <option value="Reading|#Reading #ReadingProperty #Crowthorne #BerkshireProperty">Reading / Crowthorne
+                  </option>
+                  <option value="Brighton|#Brighton #BrightonProperty #BrightonLettings #EastSussex">Brighton</option>
+                  <option value="Oxford|#Oxford #OxfordProperty #OxfordshireLettings">Oxford</option>
+                  <option value="Southampton|#Southampton #SouthamptonProperty #HampshireLettings">Southampton</option>
+                  <option value="Portsmouth|#Portsmouth #PortsmouthProperty #HampshireLettings">Portsmouth</option>
+                  <option value="Milton Keynes|#MiltonKeynes #MiltonKeynesProperty #BuckinghamshireLettings">Milton
+                    Keynes</option>
+                  <option value="Guildford|#Guildford #GuildfordProperty #SurreyLettings">Guildford</option>
+                  <option value="Canterbury|#Canterbury #CanterburyProperty #KentLettings">Canterbury</option>
+                  <option value="Maidstone|#Maidstone #MaidstoneProperty #KentProperty">Maidstone</option>
+                  <option value="Slough|#Slough #SloughProperty #BerkshireLettings">Slough</option>
+                </optgroup>
+                <optgroup label="South West">
+                  <option value="Bristol|#Bristol #BristolProperty #BristolLettings">Bristol</option>
+                  <option value="Bournemouth|#Bournemouth #BournemouthProperty #DorsetLettings #BCP">Bournemouth
+                  </option>
+                  <option value="Plymouth|#Plymouth #PlymouthProperty #DevonLettings">Plymouth</option>
+                  <option value="Exeter|#Exeter #ExeterProperty #DevonProperty">Exeter</option>
+                  <option value="Bath|#Bath #BathProperty #SomersetLettings #BANES">Bath</option>
+                  <option value="Swindon|#Swindon #SwindonProperty #WiltshireLettings">Swindon</option>
+                  <option value="Gloucester|#Gloucester #GloucesterProperty #GloucestershireLettings">Gloucester
+                  </option>
+                  <option value="Cheltenham|#Cheltenham #CheltenhamProperty #GloucestershireLettings">Cheltenham
+                  </option>
+                </optgroup>
+                <optgroup label="East of England">
+                  <option value="Cambridge|#Cambridge #CambridgeProperty #CambridgeshireLettings">Cambridge</option>
+                  <option value="Norwich|#Norwich #NorwichProperty #NorfolkLettings">Norwich</option>
+                  <option value="Ipswich|#Ipswich #IpswichProperty #SuffolkLettings">Ipswich</option>
+                  <option value="Luton|#Luton #LutonProperty #BedfordshireLettings">Luton</option>
+                  <option value="Peterborough|#Peterborough #PeterboroughProperty #CambridgeshireLettings">Peterborough
+                  </option>
+                  <option value="Colchester|#Colchester #ColchesterProperty #EssexLettings">Colchester</option>
+                  <option value="Chelmsford|#Chelmsford #ChelmsfordProperty #EssexProperty">Chelmsford</option>
+                  <option value="Southend|#Southend #SouthendOnSea #EssexLettings">Southend-on-Sea</option>
+                </optgroup>
+                <optgroup label="North East">
+                  <option value="Newcastle|#Newcastle #NewcastleProperty #NewcastleLettings #Tyneside">Newcastle
+                  </option>
+                  <option value="Sunderland|#Sunderland #SunderlandProperty #WearSideLettings">Sunderland</option>
+                  <option value="Middlesbrough|#Middlesbrough #MiddlesbroughProperty #TeessideLettings">Middlesbrough
+                  </option>
+                  <option value="Durham|#Durham #DurhamProperty #CountyDurhamLettings">Durham</option>
+                </optgroup>
+                <optgroup label="Scotland">
+                  <option value="Glasgow|#Glasgow #GlasgowProperty #GlasgowLettings #Scotland">Glasgow</option>
+                  <option value="Edinburgh|#Edinburgh #EdinburghProperty #EdinburghLettings #Scotland">Edinburgh
+                  </option>
+                  <option value="Aberdeen|#Aberdeen #AberdeenProperty #ScotlandLettings">Aberdeen</option>
+                  <option value="Dundee|#Dundee #DundeeProperty #ScotlandLettings">Dundee</option>
+                </optgroup>
+                <optgroup label="Wales">
+                  <option value="Cardiff|#Cardiff #CardiffProperty #CardiffLettings #Wales">Cardiff</option>
+                  <option value="Swansea|#Swansea #SwanseaProperty #WalesLettings">Swansea</option>
+                  <option value="Newport|#Newport #NewportProperty #WalesLettings">Newport</option>
+                </optgroup>
+                <optgroup label="Northern Ireland">
+                  <option value="Belfast|#Belfast #BelfastProperty #BelfastLettings #NorthernIreland">Belfast</option>
+                </optgroup>
+              </select>
             </div>
-            <div class="flex-btns">
-              <button class="btn btn-dark" id="postNowBtn" onclick="postNow()" style="flex:1;min-width:120px;">🚀 Post Now</button>
-              <button class="btn btn-gold-outline" onclick="openSchedModal()" style="flex:1;min-width:120px;">📅 Schedule</button>
+            <div id="selectedAreas" style="display:flex;flex-wrap:wrap;gap:6px;min-height:26px;">
+              <span id="areaPlaceholder"
+                style="font-size:11px;color:var(--text4);font-style:italic;line-height:26px;">No areas selected — post
+                will have no location hashtags</span>
             </div>
-            <div class="pub-status" id="pubStatus"></div>
+          </div>
+          <div class="mb14">
+            <label>Extra Context or Angle</label>
+            <input type="text" class="inp" id="extraCtx"
+              placeholder="e.g. landlords losing deposit disputes, EPC 2030 deadline">
           </div>
         </div>
 
-        <!-- Image -->
-        <div class="img-card" id="imgCard" style="display:none;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">🖼 Generated Image</span>
-            <div class="flex-btns" id="imgActions"></div>
+        <button class="btn btn-primary" id="genBtn" onclick="generatePost()">✨ Generate Post + Image</button>
+
+        <div id="errPanel" style="display:none;margin-top:14px;">
+          <div class="err-box"
+            style="margin-bottom:0;border-radius:var(--r2) var(--r2) 0 0;border-bottom:none;padding-bottom:10px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+              <div>
+                <div style="font-weight:700;margin-bottom:4px;">⚠️ Something went wrong</div>
+                <div id="errMsg" style="font-size:12px;line-height:1.6;"></div>
+              </div>
+              <button onclick="closeErrPanel()"
+                style="background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;line-height:1;flex-shrink:0;opacity:0.6;"
+                title="Dismiss">×</button>
+            </div>
           </div>
-          <div id="imgContainer"></div>
-          <div class="img-prompt-box" id="imgPromptBox">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text4);">Image Prompt</span>
+          <div
+            style="background:#fff5f5;border:1px solid #fecaca;border-top:1px solid #ffd5d5;border-radius:0 0 var(--r2) var(--r2);padding:14px 16px;">
+            <div
+              style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9b2c2c;margin-bottom:10px;">
+              🛟 Get Support</div>
+            <div style="font-size:12px;color:#7f1d1d;margin-bottom:12px;line-height:1.6;">Need help? Send this error to
+              the support team and we'll get it fixed. The error details are pre-filled below — just add a note if you
+              like and hit send.</div>
+            <div style="margin-bottom:10px;">
+              <label style="color:#9b2c2c;">Your message <span
+                  style="font-weight:400;text-transform:none;letter-spacing:0;">(optional — add any extra
+                  context)</span></label>
+              <textarea id="errNote" class="inp" rows="2"
+                placeholder="e.g. I was trying to generate a LinkedIn post about inventory reports when this happened..."
+                style="font-size:12px;border-color:#fecaca;"></textarea>
+            </div>
+            <button onclick="sendErrEmail()" class="btn"
+              style="background:var(--red);color:#fff;padding:10px 20px;font-size:12px;box-shadow:0 2px 8px rgba(192,57,43,0.3);">📧
+              Send Error Report</button>
+            <div id="errSentMsg"
+              style="display:none;margin-top:8px;font-size:12px;font-weight:600;color:#166534;background:#f0fdf4;padding:8px 12px;border-radius:6px;border:1px solid #bbf7d0;">
+              ✓ Error report sent — we'll look into it shortly.</div>
+          </div>
+        </div>
+
+        <div id="outputArea" style="display:none;margin-top:16px;">
+          <div id="outputWrap" class="output-wrap solo">
+
+            <!-- Post -->
+            <div class="post-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <span
+                  style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold2);">✏️
+                  Your Post — edit freely</span>
+                <div class="flex-btns">
+                  <button class="btn btn-ghost btn-sm" onclick="copyPost()" id="copyBtn">📋 Copy</button>
+                  <button class="btn btn-ghost btn-sm" onclick="rewritePost()" id="rewriteBtn">🔄 Rewrite</button>
+                </div>
+              </div>
+              <textarea class="post-edit-area" id="postEdit" oninput="updateCharCnt()"></textarea>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                <button class="btn btn-ghost btn-sm" onclick="saveToHist()">💾 Save to History</button>
+                <span class="save-confirm" id="saveConf">✓ Saved!</span>
+                <span class="char-cnt" id="charCnt" style="margin-left:auto;"></span>
+              </div>
+
+              <!-- PUBLISH -->
+              <div class="publish-bar">
+                <div class="publish-label">🚀 Publish via n8n + Blotato</div>
+                <div class="plat-checks">
+                  <label class="plat-chk"><input type="checkbox" id="p_li" checked> 💼 LinkedIn</label>
+                  <label class="plat-chk"><input type="checkbox" id="p_ig" checked> 📸 Instagram</label>
+                  <label class="plat-chk"><input type="checkbox" id="p_fb" checked> 👥 Facebook</label>
+                  <label class="plat-chk"><input type="checkbox" id="p_tt"> 🎵 TikTok</label>
+                  <label class="plat-chk"><input type="checkbox" id="p_x"> 𝕏 Twitter</label>
+                </div>
+                <div class="flex-btns">
+                  <button class="btn btn-dark" id="postNowBtn" onclick="postNow()" style="flex:1;min-width:120px;">🚀
+                    Post Now</button>
+                  <button class="btn btn-gold-outline" onclick="openSchedModal()" style="flex:1;min-width:120px;">📅
+                    Schedule</button>
+                </div>
+                <div class="pub-status" id="pubStatus"></div>
+              </div>
+            </div>
+
+            <!-- Image -->
+            <div class="img-card" id="imgCard" style="display:none;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <span
+                  style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);">🖼
+                  Generated Image</span>
+                <div class="flex-btns" id="imgActions"></div>
+              </div>
+              <div id="imgContainer"></div>
+              <div class="img-prompt-box" id="imgPromptBox">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                  <span
+                    style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text4);">Image
+                    Prompt</span>
+                  <button class="btn btn-ghost btn-sm" onclick="copyImgPrompt()">Copy</button>
+                </div>
+                <div class="img-prompt-text" id="imgPromptText"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="noKeyBox" class="no-key-box" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:12px;font-weight:700;color:var(--green2);">🖼 Image Prompt — paste into Midjourney,
+                DALL-E or Replicate</span>
               <button class="btn btn-ghost btn-sm" onclick="copyImgPrompt()">Copy</button>
             </div>
-            <div class="img-prompt-text" id="imgPromptText"></div>
+            <div id="noKeyText"
+              style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'JetBrains Mono',monospace;"></div>
+            <div style="margin-top:8px;font-size:11px;color:var(--text4);">Add your Replicate API key in Settings to
+              auto-generate images.</div>
           </div>
         </div>
       </div>
 
-      <div id="noKeyBox" class="no-key-box" style="display:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:12px;font-weight:700;color:var(--green2);">🖼 Image Prompt — paste into Midjourney, DALL-E or Replicate</span>
-          <button class="btn btn-ghost btn-sm" onclick="copyImgPrompt()">Copy</button>
+      <!-- ══ RESEARCH ══ -->
+      <div id="page-research" class="page">
+        <div class="page-header">
+          <div class="page-title">Research Topics</div>
+          <div class="page-sub">Search for information and generate posts directly from results</div>
         </div>
-        <div id="noKeyText" style="font-size:12px;color:var(--text2);line-height:1.65;font-family:'JetBrains Mono',monospace;"></div>
-        <div style="margin-top:8px;font-size:11px;color:var(--text4);">Add your Replicate API key in Settings to auto-generate images.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ RESEARCH ══ -->
-  <div id="page-research" class="page">
-    <div class="page-header">
-      <div class="page-title">Research Topics</div>
-      <div class="page-sub">Search for information and generate posts directly from results</div>
-    </div>
-    <div class="card">
-      <div class="section-label">Search the web</div>
-      <div style="display:flex;gap:10px;">
-        <input type="text" class="inp" id="researchQuery" placeholder="e.g. Renters Rights Act 2026 changes, Legionella landlord duty, EPC C rating deadline..." style="flex:1;" onkeydown="if(event.key==='Enter')doResearch()">
-        <button class="btn btn-dark" onclick="doResearch()" id="researchBtn" style="white-space:nowrap;">🔍 Search</button>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
-        <button class="btn btn-ghost btn-sm" onclick="quickSearch('Renters Rights Act 2026')">Renters Rights Act</button>
-        <button class="btn btn-ghost btn-sm" onclick="quickSearch('EPC C rating 2030 landlords')">EPC 2030</button>
-        <button class="btn btn-ghost btn-sm" onclick="quickSearch('Legionella risk assessment landlord duty UK')">Legionella law</button>
-        <button class="btn btn-ghost btn-sm" onclick="quickSearch('deposit dispute inventory report UK')">Deposit disputes</button>
-        <button class="btn btn-ghost btn-sm" onclick="quickSearch('UK rental market 2025 trends')">Rental trends</button>
-        <button class="btn btn-ghost btn-sm" onclick="quickSearch('Section 21 abolition UK lettings')">Section 21</button>
-      </div>
-    </div>
-    <div id="researchResults"></div>
-  </div>
-
-  <!-- ══ HISTORY ══ -->
-  <div id="page-hist" class="page">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <div>
-        <div class="page-title">Post History</div>
-        <div class="page-sub"><span id="histCount">0</span> posts saved this session</div>
-      </div>
-      <button class="btn btn-danger btn-sm" id="clearHistBtn" onclick="clearHist()" style="display:none;">🗑 Clear All</button>
-    </div>
-    <div id="histContainer">
-      <div class="empty"><div class="empty-emoji">📭</div><div class="empty-title">No posts saved yet</div><div class="empty-sub">Generate a post and click Save to History.</div></div>
-    </div>
-  </div>
-
-  <!-- ══ SCHEDULE ══ -->
-  <div id="page-cal" class="page">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <div>
-        <div class="page-title">Content Calendar</div>
-        <div class="page-sub">View and manage your scheduled posts</div>
-      </div>
-      <button class="btn btn-dark" onclick="openSchedModal()">+ Schedule Post</button>
-    </div>
-    <div class="cal-shell">
-      <div class="cal-top">
-        <button class="cal-nav-btn" onclick="calPrev()">‹ Prev</button>
-        <div class="cal-month-label" id="calMonthLabel"></div>
-        <button class="cal-nav-btn" onclick="calNext()">Next ›</button>
-      </div>
-      <div class="cal-dow">
-        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-      </div>
-      <div class="cal-body" id="calBody"></div>
-    </div>
-    <div class="cal-legend" style="margin-top:12px;">
-      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--gold2);"></div> Scheduled</div>
-      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--green3);"></div> Posted</div>
-      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--gold-t2);border:1px solid var(--gold2);"></div> Today</div>
-    </div>
-  </div>
-
-  <!-- ══ TRENDING ══ -->
-  <div id="page-trend" class="page">
-    <div class="page-header">
-      <div class="page-title">Trending Now</div>
-      <div class="page-sub">Live social trends and UK property news</div>
-    </div>
-    <div class="trend-grid">
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <div><div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">🔥 Trending Topics</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Relevant social trends right now</div></div>
-          <button class="btn btn-gold-outline btn-sm" onclick="fetchTrends()" id="trendBtn">↻ Refresh</button>
+        <div class="card">
+          <div class="section-label">Search the web</div>
+          <div style="display:flex;gap:10px;">
+            <input type="text" class="inp" id="researchQuery"
+              placeholder="e.g. Renters Rights Act 2026 changes, Legionella landlord duty, EPC C rating deadline..."
+              style="flex:1;" onkeydown="if(event.key==='Enter')doResearch()">
+            <button class="btn btn-dark" onclick="doResearch()" id="researchBtn" style="white-space:nowrap;">🔍
+              Search</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="quickSearch('Renters Rights Act 2026')">Renters Rights
+              Act</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickSearch('EPC C rating 2030 landlords')">EPC 2030</button>
+            <button class="btn btn-ghost btn-sm"
+              onclick="quickSearch('Legionella risk assessment landlord duty UK')">Legionella law</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickSearch('deposit dispute inventory report UK')">Deposit
+              disputes</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickSearch('UK rental market 2025 trends')">Rental
+              trends</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickSearch('Section 21 abolition UK lettings')">Section
+              21</button>
+          </div>
         </div>
-        <div id="trendContainer"><div class="empty"><div class="empty-emoji" style="font-size:36px;">🔍</div><div class="empty-sub">Click Refresh to load trends</div><button class="btn btn-gold-outline btn-sm" onclick="fetchTrends()" style="margin-top:10px;">Fetch Trends</button></div></div>
+        <div id="researchResults"></div>
       </div>
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <div><div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">📰 UK Property News</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">Latest lettings &amp; compliance updates</div></div>
-          <button class="btn btn-gold-outline btn-sm" onclick="fetchNews()" id="newsBtn">↻ Refresh</button>
+
+      <!-- ══ HISTORY ══ -->
+      <div id="page-hist" class="page">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div class="page-title">Post History</div>
+            <div class="page-sub"><span id="histCount">0</span> posts saved this session</div>
+          </div>
+          <button class="btn btn-danger btn-sm" id="clearHistBtn" onclick="clearHist()" style="display:none;">🗑 Clear
+            All</button>
         </div>
-        <div id="newsContainer"><div class="empty"><div class="empty-emoji" style="font-size:36px;">📰</div><div class="empty-sub">Click Refresh to load news</div><button class="btn btn-gold-outline btn-sm" onclick="fetchNews()" style="margin-top:10px;">Fetch News</button></div></div>
+        <div id="histContainer">
+          <div class="empty">
+            <div class="empty-emoji">📭</div>
+            <div class="empty-title">No posts saved yet</div>
+            <div class="empty-sub">Generate a post and click Save to History.</div>
+          </div>
+        </div>
       </div>
+
+      <!-- ══ SCHEDULE ══ -->
+      <div id="page-cal" class="page">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div class="page-title">Content Calendar</div>
+            <div class="page-sub">View and manage your scheduled posts</div>
+          </div>
+          <button class="btn btn-dark" onclick="openSchedModal()">+ Schedule Post</button>
+        </div>
+        <div class="cal-shell">
+          <div class="cal-top">
+            <button class="cal-nav-btn" onclick="calPrev()">‹ Prev</button>
+            <div class="cal-month-label" id="calMonthLabel"></div>
+            <button class="cal-nav-btn" onclick="calNext()">Next ›</button>
+          </div>
+          <div class="cal-dow">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+          <div class="cal-body" id="calBody"></div>
+        </div>
+        <div class="cal-legend" style="margin-top:12px;">
+          <div class="cal-leg-item">
+            <div class="cal-leg-dot" style="background:var(--gold2);"></div> Scheduled
+          </div>
+          <div class="cal-leg-item">
+            <div class="cal-leg-dot" style="background:var(--green3);"></div> Posted
+          </div>
+          <div class="cal-leg-item">
+            <div class="cal-leg-dot" style="background:var(--gold-t2);border:1px solid var(--gold2);"></div> Today
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TRENDING ══ -->
+      <div id="page-trend" class="page">
+        <div class="page-header">
+          <div class="page-title">Trending Now</div>
+          <div class="page-sub">Live social trends and UK property news</div>
+        </div>
+        <div class="trend-grid">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+              <div>
+                <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">🔥 Trending Topics
+                </div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Relevant social trends right now</div>
+              </div>
+              <button class="btn btn-gold-outline btn-sm" onclick="fetchTrends()" id="trendBtn">↻ Refresh</button>
+            </div>
+            <div id="trendContainer">
+              <div class="empty">
+                <div class="empty-emoji" style="font-size:36px;">🔍</div>
+                <div class="empty-sub">Click Refresh to load trends</div><button class="btn btn-gold-outline btn-sm"
+                  onclick="fetchTrends()" style="margin-top:10px;">Fetch Trends</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+              <div>
+                <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">📰 UK Property News
+                </div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px;">Latest lettings &amp; compliance updates
+                </div>
+              </div>
+              <button class="btn btn-gold-outline btn-sm" onclick="fetchNews()" id="newsBtn">↻ Refresh</button>
+            </div>
+            <div id="newsContainer">
+              <div class="empty">
+                <div class="empty-emoji" style="font-size:36px;">📰</div>
+                <div class="empty-sub">Click Refresh to load news</div><button class="btn btn-gold-outline btn-sm"
+                  onclick="fetchNews()" style="margin-top:10px;">Fetch News</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SETTINGS ══ -->
+      <div id="page-settings" class="page">
+        <div class="page-header">
+          <div class="page-title">Settings</div>
+          <div class="page-sub">API keys, webhook, password and master prompt</div>
+        </div>
+        <div class="settings-grid">
+
+          <div class="settings-section">
+            <div class="setting-title">🖼 Replicate API Key</div>
+            <div class="setting-sub">Used to auto-generate images. Saved in your browser — never shared.</div>
+            <div class="key-field mb14">
+              <input type="password" class="inp" id="repKeyInp" placeholder="r8_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                style="font-family:'JetBrains Mono',monospace;font-size:12px;" oninput="saveRepKey()">
+              <button class="key-reveal" onclick="toggleRepKey()" id="repRevealBtn">Show</button>
+            </div>
+            <div class="key-saved" id="repKeySaved">✓ Key saved in browser</div>
+            <div style="font-size:11px;color:var(--text4);margin-top:4px;">Get your key → <a
+                href="https://replicate.com/account/api-tokens" target="_blank"
+                style="color:var(--green3);">replicate.com/account/api-tokens</a></div>
+          </div>
+
+          <div class="settings-section">
+            <div class="setting-title">🔗 n8n Webhook URL</div>
+            <div class="setting-sub">The webhook that receives posts from the Post Now and Schedule buttons.</div>
+            <input type="text" class="inp mb14" id="webhookInp"
+              style="font-family:'JetBrains Mono',monospace;font-size:11px;" oninput="saveWebhook()">
+            <div style="font-size:11px;color:var(--text4);">Your webhook: <code
+                style="font-family:'JetBrains Mono',monospace;">https://robertpjd1.app.n8n.cloud/webhook/s2f-post</code>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="setting-title">🔐 Change Password</div>
+            <div class="setting-sub">Update the dashboard login password. Takes effect on next sign in.</div>
+            <div class="g2 mb14">
+              <div><label>New Password</label><input type="password" class="inp" id="newP1" placeholder="New password"
+                  style="font-size:12px;"></div>
+              <div><label>Confirm</label><input type="password" class="inp" id="newP2" placeholder="Confirm"
+                  style="font-size:12px;"></div>
+            </div>
+            <button class="btn btn-ghost" onclick="changePass()">Update Password</button>
+            <div id="passMsg" style="display:none;margin-top:8px;font-size:12px;font-weight:600;"></div>
+          </div>
+
+          <div class="settings-section">
+            <div class="setting-title">📍 Coverage Areas</div>
+            <div class="setting-sub">S2F active coverage areas. Hashtags are appended to the bottom of posts.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <span class="chip chip-green">Manchester</span>
+              <span class="chip chip-green">Sheffield</span>
+              <span class="chip chip-green">Reading</span>
+              <span class="chip chip-green">Birmingham</span>
+              <span class="chip chip-green">Bournemouth</span>
+              <span class="chip chip-green">London</span>
+              <span class="chip chip-green">Bristol</span>
+              <span class="chip chip-green">Leicester</span>
+            </div>
+            <div style="font-size:11px;color:var(--text4);margin-top:10px;">Select an area in the Generator to append
+              location hashtags.</div>
+          </div>
+
+          <div class="settings-section full">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <div class="setting-title">📄 Master Prompt</div>
+              <button class="btn btn-ghost btn-sm" onclick="copyMaster()" id="copyMasterBtn">📋 Copy</button>
+            </div>
+            <div class="setting-sub">Full brand context prompt used for all post generation. Copy to use in Claude.ai,
+              n8n, or Telegram.</div>
+            <pre class="prompt-code" id="masterPromptDisp"></pre>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <div style="text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:12px;">
+      <span style="font-size:11px;color:var(--text4);font-weight:500;">Built by <a
+          href="https://propertyautomationai.com" target="_blank"
+          style="color:var(--green3);text-decoration:none;font-weight:700;">Property Automation AI</a></span>
+    </div>
+
+  </div><!-- /app -->
+
+  <!-- SCHEDULE MODAL -->
+  <div class="modal-bg" id="schedModal">
+    <div class="modal-box">
+      <div class="modal-title">📅 Schedule Post</div>
+      <div class="mb14"><label>Post Text</label><textarea class="inp" id="modalPost" rows="4"
+          style="font-size:13px;line-height:1.7;" placeholder="Your post text..."></textarea></div>
+      <div class="g2 mb14">
+        <div><label>Date</label><input type="date" class="inp" id="modalDate" style="font-size:13px;"></div>
+        <div><label>Time</label><input type="time" class="inp" id="modalTime" value="09:00" style="font-size:13px;">
+        </div>
+      </div>
+      <div class="mb14">
+        <label>Platforms</label>
+        <div class="plat-checks">
+          <label class="plat-chk"><input type="checkbox" id="m_li" checked> 💼 LinkedIn</label>
+          <label class="plat-chk"><input type="checkbox" id="m_ig" checked> 📸 Instagram</label>
+          <label class="plat-chk"><input type="checkbox" id="m_fb" checked> 👥 Facebook</label>
+          <label class="plat-chk"><input type="checkbox" id="m_tt"> 🎵 TikTok</label>
+          <label class="plat-chk"><input type="checkbox" id="m_x"> 𝕏 Twitter</label>
+        </div>
+      </div>
+      <div class="flex-btns">
+        <button class="btn btn-dark" onclick="confirmSched()" style="flex:1;">📅 Confirm Schedule</button>
+        <button class="btn btn-ghost" onclick="closeSchedModal()">Cancel</button>
+      </div>
+      <div class="modal-status" id="modalStatus"></div>
     </div>
   </div>
 
-  <!-- ══ SETTINGS ══ -->
-  <div id="page-settings" class="page">
-    <div class="page-header">
-      <div class="page-title">Settings</div>
-      <div class="page-sub">API keys, webhook, password and master prompt</div>
-    </div>
-    <div class="settings-grid">
+  <script>
+    // ═══════════════════════════════════════
+    // MASTER PROMPT
+    // ═══════════════════════════════════════
+    var MASTER = "You are a social media content expert for S2F Property Services Ltd (https://s2fpropertyservices.com), a UK-based nationwide property inspection and reporting company.\n\n## ABOUT S2F\nServices: Inventory Reports, Inventory Check-In Reports, Check-Outs, Mid-Term Inspections, Block Inspections, Vacant Property Inspections, Property Viewings, 360 Virtual Tours, EPCs & Floor Plans, End-of-Tenancy Cleaning, Health & Safety Reports (Legionella Risk Assessments, Fire Risk Assessments, Emergency Lighting Tests), Council and Local Authority Reports\nClients: Letting agents, property managers, landlords, councils across the UK\nBrand voice: Professional, trustworthy, knowledgeable, approachable — NOT corporate or stiff\nPhone: 0207 082 3003 | 0800 411 8001 | Website: https://s2fpropertyservices.com\nCoverage: Manchester, Sheffield, Reading & Crowthorne, Birmingham, Bournemouth, London, Bristol, Leicester\n\n## TARGET AUDIENCE\nPrimary: Letting agents and property managers\nSecondary: Private landlords, councils, housing associations\nPain points: Compliance risk, deposit disputes, property damage, costly legal claims, unreliable contractors, time pressure\n\n## POST STRUCTURE\n1. HOOK: Bold pattern-interrupting opening. Shocking stat, myth-bust, hot take, relatable frustration.\n2. BODY: Value. Short punchy sentences. Generous line breaks. Each line earns its place.\n3. ENGAGEMENT QUESTION: ONE clear question to drive comments.\n4. CTA: Soft call-to-action.\n5. HASHTAGS: 5-10 relevant. If area hashtags are specified, ADD them AFTER the topic hashtags.\n\n## PLATFORM RULES\n- LinkedIn: 1-3 emojis, 150-300 words, professional, story-driven\n- Instagram: 4-8 emojis, 80-150 words, punchy, visual-first\n- Facebook: 2-5 emojis, 100-200 words, conversational\n- X (Twitter): 1-3 sentences, 1-2 hashtags only\n- TikTok: Short hook, casual, 3-5 hashtags\n- ALWAYS use line breaks. First word punchy: Most / Stop / If / Your / Did / 92%\n\n## CONTENT PILLARS\n1. Education — compliance, legal, best practice\n2. Pain Point — costly mistakes\n3. Service Spotlight — specific S2F service benefits\n4. Industry Insight — UK property trends\n5. Trust / Behind the Scenes\n6. Hot Take / Opinion — bold stance to spark debate\n\n## UK COMPLIANCE\n- Deposit Protection: TDS, DPS, mydeposits\n- Section 21 abolition / Renters Rights Act 2026\n- Legionella — landlord legal duty\n- Fire safety, emergency lighting\n- EPC minimum E rating, C by 2030\n\nOutput ONLY the post text. No preamble, labels, or explanations.";
 
-      <div class="settings-section">
-        <div class="setting-title">🖼 Replicate API Key</div>
-        <div class="setting-sub">Used to auto-generate images. Saved in your browser — never shared.</div>
-        <div class="key-field mb14">
-          <input type="password" class="inp" id="repKeyInp" placeholder="r8_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="font-family:'JetBrains Mono',monospace;font-size:12px;" oninput="saveRepKey()">
-          <button class="key-reveal" onclick="toggleRepKey()" id="repRevealBtn">Show</button>
-        </div>
-        <div class="key-saved" id="repKeySaved">✓ Key saved in browser</div>
-        <div style="font-size:11px;color:var(--text4);margin-top:4px;">Get your key → <a href="https://replicate.com/account/api-tokens" target="_blank" style="color:var(--green3);">replicate.com/account/api-tokens</a></div>
-      </div>
+    var IMG_SYS = "Write a Flux-dev image prompt for an S2F Property Services social media post. Rules: photorealistic, bright professional lighting. NO text, logos, signs. Scenes: modern UK homes/flats, inspector with tablet/clipboard, clean interiors. People from behind only. Aspirational UK property magazine style, square 1:1. Output ONLY the prompt. Max 80 words.";
 
-      <div class="settings-section">
-        <div class="setting-title">🔗 n8n Webhook URL</div>
-        <div class="setting-sub">The webhook that receives posts from the Post Now and Schedule buttons.</div>
-        <input type="text" class="inp mb14" id="webhookInp" style="font-family:'JetBrains Mono',monospace;font-size:11px;" oninput="saveWebhook()">
-        <div style="font-size:11px;color:var(--text4);">Your webhook: <code style="font-family:'JetBrains Mono',monospace;">https://robertpjd1.app.n8n.cloud/webhook/s2f-post</code></div>
-      </div>
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    var curPlatform = 'LinkedIn', curSvcs = [], curAreas = [], curPost = '', curImgUrl = '', curImgPrompt = '';
+    var postHistory = [], trendData = [], newsData = [], scheduledPosts = [];
+    var calY, calM;
+    var PASS = localStorage.getItem('s2f_pass') || 's2f2024';
 
-      <div class="settings-section">
-        <div class="setting-title">🔐 Change Password</div>
-        <div class="setting-sub">Update the dashboard login password. Takes effect on next sign in.</div>
-        <div class="g2 mb14">
-          <div><label>New Password</label><input type="password" class="inp" id="newP1" placeholder="New password" style="font-size:12px;"></div>
-          <div><label>Confirm</label><input type="password" class="inp" id="newP2" placeholder="Confirm" style="font-size:12px;"></div>
-        </div>
-        <button class="btn btn-ghost" onclick="changePass()">Update Password</button>
-        <div id="passMsg" style="display:none;margin-top:8px;font-size:12px;font-weight:600;"></div>
-      </div>
-
-      <div class="settings-section">
-        <div class="setting-title">📍 Coverage Areas</div>
-        <div class="setting-sub">S2F active coverage areas. Hashtags are appended to the bottom of posts.</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <span class="chip chip-green">Manchester</span>
-          <span class="chip chip-green">Sheffield</span>
-          <span class="chip chip-green">Reading</span>
-          <span class="chip chip-green">Birmingham</span>
-          <span class="chip chip-green">Bournemouth</span>
-          <span class="chip chip-green">London</span>
-          <span class="chip chip-green">Bristol</span>
-          <span class="chip chip-green">Leicester</span>
-        </div>
-        <div style="font-size:11px;color:var(--text4);margin-top:10px;">Select an area in the Generator to append location hashtags.</div>
-      </div>
-
-      <div class="settings-section full">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <div class="setting-title">📄 Master Prompt</div>
-          <button class="btn btn-ghost btn-sm" onclick="copyMaster()" id="copyMasterBtn">📋 Copy</button>
-        </div>
-        <div class="setting-sub">Full brand context prompt used for all post generation. Copy to use in Claude.ai, n8n, or Telegram.</div>
-        <pre class="prompt-code" id="masterPromptDisp"></pre>
-      </div>
-
-    </div>
-  </div>
-
-  </div><!-- /content -->
-
-  <div style="text-align:center;padding:20px;border-top:1px solid var(--border);margin-top:12px;">
-    <span style="font-size:11px;color:var(--text4);font-weight:500;">Built by <a href="https://propertyautomationai.com" target="_blank" style="color:var(--green3);text-decoration:none;font-weight:700;">Property Automation AI</a></span>
-  </div>
-
-</div><!-- /app -->
-
-<!-- SCHEDULE MODAL -->
-<div class="modal-bg" id="schedModal">
-  <div class="modal-box">
-    <div class="modal-title">📅 Schedule Post</div>
-    <div class="mb14"><label>Post Text</label><textarea class="inp" id="modalPost" rows="4" style="font-size:13px;line-height:1.7;" placeholder="Your post text..."></textarea></div>
-    <div class="g2 mb14">
-      <div><label>Date</label><input type="date" class="inp" id="modalDate" style="font-size:13px;"></div>
-      <div><label>Time</label><input type="time" class="inp" id="modalTime" value="09:00" style="font-size:13px;"></div>
-    </div>
-    <div class="mb14">
-      <label>Platforms</label>
-      <div class="plat-checks">
-        <label class="plat-chk"><input type="checkbox" id="m_li" checked> 💼 LinkedIn</label>
-        <label class="plat-chk"><input type="checkbox" id="m_ig" checked> 📸 Instagram</label>
-        <label class="plat-chk"><input type="checkbox" id="m_fb" checked> 👥 Facebook</label>
-        <label class="plat-chk"><input type="checkbox" id="m_tt"> 🎵 TikTok</label>
-        <label class="plat-chk"><input type="checkbox" id="m_x"> 𝕏 Twitter</label>
-      </div>
-    </div>
-    <div class="flex-btns">
-      <button class="btn btn-dark" onclick="confirmSched()" style="flex:1;">📅 Confirm Schedule</button>
-      <button class="btn btn-ghost" onclick="closeSchedModal()">Cancel</button>
-    </div>
-    <div class="modal-status" id="modalStatus"></div>
-  </div>
-</div>
-
-<script>
-// ═══════════════════════════════════════
-// MASTER PROMPT
-// ═══════════════════════════════════════
-var MASTER = "You are a social media content expert for S2F Property Services Ltd (https://s2fpropertyservices.com), a UK-based nationwide property inspection and reporting company.\n\n## ABOUT S2F\nServices: Inventory Reports, Inventory Check-In Reports, Check-Outs, Mid-Term Inspections, Block Inspections, Vacant Property Inspections, Property Viewings, 360 Virtual Tours, EPCs & Floor Plans, End-of-Tenancy Cleaning, Health & Safety Reports (Legionella Risk Assessments, Fire Risk Assessments, Emergency Lighting Tests), Council and Local Authority Reports\nClients: Letting agents, property managers, landlords, councils across the UK\nBrand voice: Professional, trustworthy, knowledgeable, approachable — NOT corporate or stiff\nPhone: 0207 082 3003 | 0800 411 8001 | Website: https://s2fpropertyservices.com\nCoverage: Manchester, Sheffield, Reading & Crowthorne, Birmingham, Bournemouth, London, Bristol, Leicester\n\n## TARGET AUDIENCE\nPrimary: Letting agents and property managers\nSecondary: Private landlords, councils, housing associations\nPain points: Compliance risk, deposit disputes, property damage, costly legal claims, unreliable contractors, time pressure\n\n## POST STRUCTURE\n1. HOOK: Bold pattern-interrupting opening. Shocking stat, myth-bust, hot take, relatable frustration.\n2. BODY: Value. Short punchy sentences. Generous line breaks. Each line earns its place.\n3. ENGAGEMENT QUESTION: ONE clear question to drive comments.\n4. CTA: Soft call-to-action.\n5. HASHTAGS: 5-10 relevant. If area hashtags are specified, ADD them AFTER the topic hashtags.\n\n## PLATFORM RULES\n- LinkedIn: 1-3 emojis, 150-300 words, professional, story-driven\n- Instagram: 4-8 emojis, 80-150 words, punchy, visual-first\n- Facebook: 2-5 emojis, 100-200 words, conversational\n- X (Twitter): 1-3 sentences, 1-2 hashtags only\n- TikTok: Short hook, casual, 3-5 hashtags\n- ALWAYS use line breaks. First word punchy: Most / Stop / If / Your / Did / 92%\n\n## CONTENT PILLARS\n1. Education — compliance, legal, best practice\n2. Pain Point — costly mistakes\n3. Service Spotlight — specific S2F service benefits\n4. Industry Insight — UK property trends\n5. Trust / Behind the Scenes\n6. Hot Take / Opinion — bold stance to spark debate\n\n## UK COMPLIANCE\n- Deposit Protection: TDS, DPS, mydeposits\n- Section 21 abolition / Renters Rights Act 2026\n- Legionella — landlord legal duty\n- Fire safety, emergency lighting\n- EPC minimum E rating, C by 2030\n\nOutput ONLY the post text. No preamble, labels, or explanations.";
-
-var IMG_SYS = "Write a Flux-dev image prompt for an S2F Property Services social media post. Rules: photorealistic, bright professional lighting. NO text, logos, signs. Scenes: modern UK homes/flats, inspector with tablet/clipboard, clean interiors. People from behind only. Aspirational UK property magazine style, square 1:1. Output ONLY the prompt. Max 80 words.";
-
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
-var curPlatform = 'LinkedIn', curSvcs = [], curAreas = [], curPost = '', curImgUrl = '', curImgPrompt = '';
-var postHistory = [], trendData = [], newsData = [], scheduledPosts = [];
-var calY, calM;
-var PASS = localStorage.getItem('s2f_pass') || 's2f2024';
-
-// ═══════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════
-function doLogin() {
-  PASS = localStorage.getItem('s2f_pass') || 's2f2024';
-  if (document.getElementById('loginPass').value === PASS) {
-    document.getElementById('loginWrap').style.display = 'none';
-    localStorage.setItem('s2f_auth','1');
-  } else {
-    document.getElementById('loginErr').style.display = 'block';
-    document.getElementById('loginPass').value = '';
-  }
-}
-function doLogout() { localStorage.removeItem('s2f_auth'); location.reload(); }
-if (localStorage.getItem('s2f_auth') === '1') document.getElementById('loginWrap').style.display = 'none';
-
-// ═══════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════
-document.getElementById('masterPromptDisp').textContent = MASTER;
-var rk = localStorage.getItem('s2f_rep_key');
-if (rk) { document.getElementById('repKeyInp').value = rk; document.getElementById('repKeySaved').style.display = 'block'; }
-document.getElementById('webhookInp').value = localStorage.getItem('s2f_webhook') || 'https://robertpjd1.app.n8n.cloud/webhook/s2f-post';
-try { scheduledPosts = JSON.parse(localStorage.getItem('s2f_sched') || '[]'); } catch(e){}
-var t = new Date(); calY = t.getFullYear(); calM = t.getMonth();
-
-// ═══════════════════════════════════════
-// NAV
-// ═══════════════════════════════════════
-function showPage(n) {
-  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('page-'+n).classList.add('active');
-  document.getElementById('tab-'+n).classList.add('active');
-  if (n==='trend' && !trendData.length) { fetchTrends(); fetchNews(); }
-  if (n==='cal') renderCal();
-}
-
-// ═══════════════════════════════════════
-// GENERATOR
-// ═══════════════════════════════════════
-function setPlatform(v, el) {
-  curPlatform = v;
-  document.querySelectorAll('#platPills .pill').forEach(function(b){ b.classList.remove('active'); });
-  el.classList.add('active');
-}
-function toggleSvc(v, el) {
-  var idx = curSvcs.indexOf(v);
-  if (idx > -1) { curSvcs.splice(idx, 1); el.classList.remove('active'); }
-  else { curSvcs.push(v); el.classList.add('active'); }
-}
-function addArea(sel) {
-  var val = sel.value; if (!val) return;
-  var parts = val.split('|'); var name = parts[0]; var tags = parts[1];
-  if (curAreas.find(function(a){ return a.name === name; })) { sel.value=''; return; }
-  curAreas.push({name:name, tags:tags});
-  renderAreaChips();
-  sel.value = '';
-}
-function removeArea(name) {
-  curAreas = curAreas.filter(function(a){ return a.name !== name; });
-  renderAreaChips();
-}
-function renderAreaChips() {
-  var wrap = document.getElementById('selectedAreas');
-  var ph = document.getElementById('areaPlaceholder');
-  if (!curAreas.length) {
-    wrap.innerHTML = '<span id="areaPlaceholder" style="font-size:11px;color:var(--text4);font-style:italic;line-height:26px;">No areas selected — post will have no location hashtags</span>';
-    return;
-  }
-  var h = '';
-  curAreas.forEach(function(a) {
-    h += '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--green-t2);border:1.5px solid var(--green3);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--green2);">📍 '+esc(a.name)+'<button onclick="removeArea(\''+a.name+'\')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1;padding:0;margin-left:2px;" title="Remove">×</button></span>';
-  });
-  wrap.innerHTML = h;
-}
-
-function updateCharCnt() {
-  var lims = {LinkedIn:3000,Instagram:2200,Facebook:63206,'X (Twitter)':280,TikTok:2200,'All Platforms':280};
-  var lim = lims[curPlatform]||3000, len = document.getElementById('postEdit').value.length;
-  var el = document.getElementById('charCnt');
-  el.textContent = len+' / '+lim+' chars';
-  el.className = len>lim ? 'char-cnt char-over' : 'char-cnt';
-}
-
-async function generatePost() {
-  var pillar = document.getElementById('pillarSel').value;
-  var tone   = document.getElementById('toneSel').value;
-  var extra  = document.getElementById('extraCtx').value.trim();
-  var locVal = curAreas.map(function(a){ return a.tags; }).join(' ');
-  var repKey = document.getElementById('repKeyInp').value.trim();
-  var btn    = document.getElementById('genBtn');
-
-  document.getElementById('errPanel').style.display = 'none';
-  document.getElementById('errSentMsg').style.display = 'none';
-  document.getElementById('outputArea').style.display = 'none';
-  document.getElementById('imgCard').style.display = 'none';
-  document.getElementById('noKeyBox').style.display = 'none';
-  document.getElementById('pubStatus').style.display = 'none';
-  curPost=''; curImgUrl=''; curImgPrompt='';
-
-  btn.disabled=true; btn.textContent='Generating...';
-
-  var isAll = curPlatform==='All Platforms';
-  var req = 'Generate a '+(isAll?'LinkedIn, Instagram, Facebook, X, and TikTok':curPlatform)+' post:\n';
-  req += '- Pillar: '+pillar+'\n';
-  if (curSvcs.length) req += '- Services to cover: '+curSvcs.join(', ')+'\n';
-  if (tone) req += '- Tone: '+tone+'\n';
-  if (extra) req += '- Angle: '+extra+'\n';
-  if (locVal) req += '- Append these location hashtags AFTER the regular hashtags: '+locVal+'\n';
-  if (isAll) req += 'Label each: LINKEDIN: / INSTAGRAM: / FACEBOOK: / X: / TIKTOK:';
-
-  try {
-    var r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,system:MASTER,messages:[{role:'user',content:req}]})});
-    var d = await r.json();
-    curPost = (d.content||[]).map(function(b){return b.text||'';}).join('');
-    if (!curPost) throw new Error('No response. Check your internet connection.');
-    document.getElementById('postEdit').value = curPost;
-    document.getElementById('outputWrap').className = 'output-wrap solo';
-    document.getElementById('outputArea').style.display = 'block';
-    updateCharCnt();
-    btn.textContent='Building image prompt...';
-    var ir = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:180,system:IMG_SYS,messages:[{role:'user',content:'Post:\n\n'+curPost}]})});
-    var id2 = await ir.json();
-    curImgPrompt = (id2.content||[]).map(function(b){return b.text||'';}).join('').trim();
-    if (repKey && curImgPrompt) { await genImage(repKey); }
-    else if (curImgPrompt) { document.getElementById('noKeyText').textContent=curImgPrompt; document.getElementById('noKeyBox').style.display='block'; }
-  } catch(e) {
-    showErrPanel(e.message||'Something went wrong. Please try again.');
-  }
-  btn.disabled=false; btn.textContent='✨ Generate Post + Image';
-}
-
-async function genImage(key) {
-  var k = key||document.getElementById('repKeyInp').value.trim();
-  if (!k||!curImgPrompt) return;
-  document.getElementById('outputWrap').className='output-wrap';
-  document.getElementById('imgCard').style.display='block';
-  document.getElementById('imgContainer').innerHTML='<div class="img-placeholder"><div class="spinner"></div><span style="font-size:12px;color:var(--text4);">Generating with Flux-dev...</span></div>';
-  document.getElementById('imgActions').innerHTML='';
-  document.getElementById('imgPromptBox').style.display='none';
-  var body=JSON.stringify({input:{prompt:curImgPrompt,aspect_ratio:'1:1',output_format:'webp',output_quality:85}});
-  var rUrl='https://api.replicate.com/v1/models/black-forest-labs/flux-dev/predictions';
-  var pUrl='https://corsproxy.io/?'+encodeURIComponent(rUrl);
-  var r,d,url;
-  try { r=await fetch(rUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k,'Prefer':'wait=60'},body:body}); d=await r.json(); url=Array.isArray(d.output)?d.output[0]:d.output; } catch(e){url=null;}
-  if(!url){ try { r=await fetch(pUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k,'Prefer':'wait=60','x-requested-with':'XMLHttpRequest'},body:body}); d=await r.json(); url=Array.isArray(d.output)?d.output[0]:d.output; } catch(e){url=null;} }
-  if(!url&&d&&d.id&&d.status!=='failed'){
-    var poll='https://corsproxy.io/?'+encodeURIComponent('https://api.replicate.com/v1/predictions/'+d.id);
-    for(var i=0;i<20;i++){
-      await new Promise(function(res){setTimeout(res,3000);});
-      try{ var p2=await fetch(poll,{headers:{'Authorization':'Bearer '+k,'x-requested-with':'XMLHttpRequest'}}); var pd2=await p2.json(); if(pd2.status==='succeeded'){url=Array.isArray(pd2.output)?pd2.output[0]:pd2.output;break;} if(pd2.status==='failed')break; document.getElementById('imgContainer').innerHTML='<div class="img-placeholder"><div class="spinner"></div><span style="font-size:12px;color:var(--text4);">Processing... '+(i+1)*3+'s</span></div>'; }catch(e2){break;}
+    // ═══════════════════════════════════════
+    // LOGIN
+    // ═══════════════════════════════════════
+    function doLogin() {
+      PASS = localStorage.getItem('s2f_pass') || 's2f2024';
+      if (document.getElementById('loginPass').value === PASS) {
+        document.getElementById('loginWrap').style.display = 'none';
+        localStorage.setItem('s2f_auth', '1');
+      } else {
+        document.getElementById('loginErr').style.display = 'block';
+        document.getElementById('loginPass').value = '';
+      }
     }
-  }
-  if(url&&typeof url==='string'){
-    curImgUrl=url;
-    document.getElementById('imgContainer').innerHTML='<img src="'+url+'" class="gen-img" alt="Generated">';
-    document.getElementById('imgActions').innerHTML='<button class="btn btn-ghost btn-sm" onclick="genImage()">↻ Redo</button><a href="'+url+'" target="_blank" class="btn btn-gold-outline btn-sm">↓ Download</a>';
-    document.getElementById('imgPromptText').textContent=curImgPrompt;
-    document.getElementById('imgPromptBox').style.display='block';
-  } else {
-    document.getElementById('imgContainer').innerHTML='<div class="img-placeholder"><span style="font-size:20px;">⚠️</span><span style="font-size:12px;color:var(--text4);text-align:center;padding:0 12px;">Image failed. Check your Replicate key in Settings.<br><br>Your image prompt is shown below.</span></div>';
-    if(curImgPrompt){document.getElementById('imgPromptText').textContent=curImgPrompt;document.getElementById('imgPromptBox').style.display='block';}
-  }
-}
+    function doLogout() { localStorage.removeItem('s2f_auth'); location.reload(); }
+    if (localStorage.getItem('s2f_auth') === '1') document.getElementById('loginWrap').style.display = 'none';
 
-async function rewritePost() {
-  var btn=document.getElementById('rewriteBtn'); btn.disabled=true; btn.textContent='Rewriting...';
-  try {
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,system:MASTER,messages:[{role:'user',content:'Rewrite this '+curPlatform+' post with a completely different hook and angle. Same service.\n\n'+document.getElementById('postEdit').value}]})});
-    var d=await r.json(); var np=(d.content||[]).map(function(b){return b.text||'';}).join(''); if(np){document.getElementById('postEdit').value=np;curPost=np;updateCharCnt();}
-  } catch(e){}
-  btn.disabled=false; btn.textContent='🔄 Rewrite';
-}
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    document.getElementById('masterPromptDisp').textContent = MASTER;
+    var rk = localStorage.getItem('s2f_rep_key');
+    if (rk) { document.getElementById('repKeyInp').value = rk; document.getElementById('repKeySaved').style.display = 'block'; }
+    document.getElementById('webhookInp').value = localStorage.getItem('s2f_webhook') || 'https://robertpjd1.app.n8n.cloud/webhook/s2f-post';
+    try { scheduledPosts = JSON.parse(localStorage.getItem('s2f_sched') || '[]'); } catch (e) { }
+    var t = new Date(); calY = t.getFullYear(); calM = t.getMonth();
 
-function copyPost(){ navigator.clipboard.writeText(document.getElementById('postEdit').value); var b=document.getElementById('copyBtn'); b.textContent='Copied!'; setTimeout(function(){b.textContent='📋 Copy';},2000); }
-function copyImgPrompt(){ if(curImgPrompt)navigator.clipboard.writeText(curImgPrompt); }
-function copyMaster(){ navigator.clipboard.writeText(MASTER); var b=document.getElementById('copyMasterBtn'); b.textContent='Copied!'; setTimeout(function(){b.textContent='📋 Copy';},2000); }
+    // ═══════════════════════════════════════
+    // NAV
+    // ═══════════════════════════════════════
+    function showPage(n) {
+      document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
+      document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
+      document.getElementById('page-' + n).classList.add('active');
+      document.getElementById('tab-' + n).classList.add('active');
+      if (n === 'trend' && !trendData.length) { fetchTrends(); fetchNews(); }
+      if (n === 'cal') renderCal();
+    }
 
-// ═══════════════════════════════════════
-// HISTORY
-// ═══════════════════════════════════════
-function saveToHist() {
-  var text=document.getElementById('postEdit').value.trim(); if(!text)return;
-  postHistory.unshift({id:Date.now(),platform:curPlatform,pillar:document.getElementById('pillarSel').value,svc:curSvcs.join(', ')||'',post:text,imgUrl:curImgUrl,imgPrompt:curImgPrompt,time:new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})});
-  updateHistBadge(); renderHist();
-  var sc=document.getElementById('saveConf'); sc.style.display='inline'; setTimeout(function(){sc.style.display='none';},2500);
-}
-function updateHistBadge(){
-  var b=document.getElementById('histBadge'),c=document.getElementById('histCount');
-  b.textContent=postHistory.length; b.style.display=postHistory.length?'inline':'none'; c.textContent=postHistory.length;
-  document.getElementById('clearHistBtn').style.display=postHistory.length?'inline-flex':'none';
-}
-function renderHist(){
-  var c=document.getElementById('histContainer');
-  if(!postHistory.length){c.innerHTML='<div class="empty"><div class="empty-emoji">📭</div><div class="empty-title">No posts saved yet</div><div class="empty-sub">Generate a post and click Save to History.</div></div>';return;}
-  var h='<div class="hist-grid">';
-  postHistory.forEach(function(e){
-    h+='<div class="hist-card">';
-    h+=e.imgUrl?'<img src="'+e.imgUrl+'" class="hist-thumb" alt="">':'<div class="hist-thumb-ph">🏠</div>';
-    h+='<div class="hist-body"><div class="hist-chips"><span class="chip chip-gold">'+esc(e.platform)+'</span><span class="chip chip-green">'+esc(e.pillar)+'</span>';
-    if(e.svc)h+='<span class="chip chip-blue">'+esc(e.svc)+'</span>';
-    h+='</div><div class="hist-text">'+esc(e.post)+'</div>';
-    h+='<div class="hist-footer"><button class="btn btn-ghost btn-sm" onclick="copyHist('+e.id+')">📋 Copy</button>';
-    if(e.imgUrl)h+='<a href="'+e.imgUrl+'" target="_blank" class="btn btn-ghost btn-sm">↓ Image</a>';
-    h+='<button class="btn btn-ghost btn-sm" onclick="useHist('+e.id+')" style="color:var(--green2);">↩ Use</button>';
-    h+='<button class="btn btn-danger btn-sm" onclick="delHist('+e.id+')">🗑</button>';
-    h+='</div><div class="hist-time">'+e.time+'</div></div></div>';
-  });
-  h+='</div>'; c.innerHTML=h;
-}
-function copyHist(id){var e=postHistory.find(function(x){return x.id===id;});if(e)navigator.clipboard.writeText(e.post);}
-function useHist(id){
-  var e=postHistory.find(function(x){return x.id===id;});if(!e)return;
-  curPost=e.post;curImgUrl=e.imgUrl;curImgPrompt=e.imgPrompt;
-  document.getElementById('postEdit').value=e.post;
-  document.getElementById('outputArea').style.display='block';
-  if(e.imgUrl){document.getElementById('outputWrap').className='output-wrap';document.getElementById('imgCard').style.display='block';document.getElementById('imgContainer').innerHTML='<img src="'+e.imgUrl+'" class="gen-img">';document.getElementById('imgActions').innerHTML='<a href="'+e.imgUrl+'" target="_blank" class="btn btn-gold-outline btn-sm">↓ Download</a>';document.getElementById('imgPromptBox').style.display='none';}
-  showPage('gen');updateCharCnt();
-}
-function delHist(id){postHistory=postHistory.filter(function(x){return x.id!==id;});updateHistBadge();renderHist();}
-function clearHist(){if(confirm('Clear all saved posts?')){postHistory=[];updateHistBadge();renderHist();}}
+    // ═══════════════════════════════════════
+    // GENERATOR
+    // ═══════════════════════════════════════
+    function setPlatform(v, el) {
+      curPlatform = v;
+      document.querySelectorAll('#platPills .pill').forEach(function (b) { b.classList.remove('active'); });
+      el.classList.add('active');
+    }
+    function toggleSvc(v, el) {
+      var idx = curSvcs.indexOf(v);
+      if (idx > -1) { curSvcs.splice(idx, 1); el.classList.remove('active'); }
+      else { curSvcs.push(v); el.classList.add('active'); }
+    }
+    function addArea(sel) {
+      var val = sel.value; if (!val) return;
+      var parts = val.split('|'); var name = parts[0]; var tags = parts[1];
+      if (curAreas.find(function (a) { return a.name === name; })) { sel.value = ''; return; }
+      curAreas.push({ name: name, tags: tags });
+      renderAreaChips();
+      sel.value = '';
+    }
+    function removeArea(name) {
+      curAreas = curAreas.filter(function (a) { return a.name !== name; });
+      renderAreaChips();
+    }
+    function renderAreaChips() {
+      var wrap = document.getElementById('selectedAreas');
+      var ph = document.getElementById('areaPlaceholder');
+      if (!curAreas.length) {
+        wrap.innerHTML = '<span id="areaPlaceholder" style="font-size:11px;color:var(--text4);font-style:italic;line-height:26px;">No areas selected — post will have no location hashtags</span>';
+        return;
+      }
+      var h = '';
+      curAreas.forEach(function (a) {
+        h += '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--green-t2);border:1.5px solid var(--green3);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--green2);">📍 ' + esc(a.name) + '<button onclick="removeArea(\'' + a.name + '\')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1;padding:0;margin-left:2px;" title="Remove">×</button></span>';
+      });
+      wrap.innerHTML = h;
+    }
 
-// ═══════════════════════════════════════
-// PUBLISH
-// ═══════════════════════════════════════
-async function postNow() {
-  var text=document.getElementById('postEdit').value.trim(); if(!text){showPub('pub-err','No post text.');return;}
-  var wh=document.getElementById('webhookInp').value.trim()||'https://robertpjd1.app.n8n.cloud/webhook/s2f-post';
-  var plats=getCheckedPlats('p_'); if(!plats.length){showPub('pub-err','Select at least one platform.');return;}
-  var btn=document.getElementById('postNowBtn'); btn.disabled=true; btn.textContent='Posting...';
-  showPub('pub-info','Sending to n8n...');
-  try {
-    var r=await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postText:text,platform:plats.join(', '),imageUrl:curImgUrl||'',isScheduled:false})});
-    if(r.ok||r.status===200){showPub('pub-ok','🚀 Sent! Publishing to '+plats.join(', ')+' via Blotato...');saveToHist();}
-    else{showPub('pub-err','n8n returned '+r.status+'. Check webhook is active.');}
-  } catch(e){ showPub('pub-warn','⚠️ CORS blocked — host on GitHub Pages for Post Now to work. Your post text is ready to copy above.'); }
-  btn.disabled=false; btn.textContent='🚀 Post Now';
-}
-function getCheckedPlats(pfx){
-  var p=[]; if(document.getElementById(pfx+'li').checked)p.push('LinkedIn'); if(document.getElementById(pfx+'ig').checked)p.push('Instagram'); if(document.getElementById(pfx+'fb').checked)p.push('Facebook'); if(document.getElementById(pfx+'tt').checked)p.push('TikTok'); if(document.getElementById(pfx+'x').checked)p.push('Twitter'); return p;
-}
-function showPub(cls,msg){var el=document.getElementById('pubStatus');el.className='pub-status '+cls;el.innerHTML=msg;el.style.display='block';}
+    function updateCharCnt() {
+      var lims = { LinkedIn: 3000, Instagram: 2200, Facebook: 63206, 'X (Twitter)': 280, TikTok: 2200, 'All Platforms': 280 };
+      var lim = lims[curPlatform] || 3000, len = document.getElementById('postEdit').value.length;
+      var el = document.getElementById('charCnt');
+      el.textContent = len + ' / ' + lim + ' chars';
+      el.className = len > lim ? 'char-cnt char-over' : 'char-cnt';
+    }
 
-// ═══════════════════════════════════════
-// SCHEDULE
-// ═══════════════════════════════════════
-function openSchedModal(){
-  var cur=document.getElementById('postEdit')?document.getElementById('postEdit').value:'';
-  document.getElementById('modalPost').value=cur;
-  var tm=new Date();tm.setDate(tm.getDate()+1);
-  document.getElementById('modalDate').value=tm.toISOString().split('T')[0];
-  document.getElementById('modalStatus').style.display='none';
-  document.getElementById('schedModal').classList.add('open');
-}
-function closeSchedModal(){document.getElementById('schedModal').classList.remove('open');}
-document.getElementById('schedModal').addEventListener('click',function(e){if(e.target===this)closeSchedModal();});
+    async function generatePost() {
+      var pillar = document.getElementById('pillarSel').value;
+      var tone = document.getElementById('toneSel').value;
+      var extra = document.getElementById('extraCtx').value.trim();
+      var locVal = curAreas.map(function (a) { return a.tags; }).join(' ');
+      var repKey = document.getElementById('repKeyInp').value.trim();
+      var btn = document.getElementById('genBtn');
 
-async function confirmSched(){
-  var text=document.getElementById('modalPost').value.trim(),date=document.getElementById('modalDate').value,time=document.getElementById('modalTime').value||'09:00';
-  if(!text){showModalSt('pub-err','Enter post text.');return;}
-  if(!date){showModalSt('pub-err','Pick a date.');return;}
-  var plats=getCheckedPlats('m_'); if(!plats.length){showModalSt('pub-err','Select platform.');return;}
-  scheduledPosts.push({id:Date.now(),postText:text,date:date,time:time,platforms:plats,imgUrl:curImgUrl||'',status:'scheduled'});
-  localStorage.setItem('s2f_sched',JSON.stringify(scheduledPosts));
-  var wh=document.getElementById('webhookInp').value.trim()||'https://robertpjd1.app.n8n.cloud/webhook/s2f-post';
-  try{await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postText:text,platform:plats.join(', '),imageUrl:curImgUrl||'',scheduledFor:date+'T'+time+':00',isScheduled:true})});}catch(e){}
-  showModalSt('pub-ok','✅ Scheduled for '+date+' at '+time);
-  renderCal();
-  setTimeout(closeSchedModal,1800);
-}
-function showModalSt(cls,msg){var el=document.getElementById('modalStatus');el.className='modal-status '+cls;el.innerHTML=msg;el.style.display='block';}
+      document.getElementById('errPanel').style.display = 'none';
+      document.getElementById('errSentMsg').style.display = 'none';
+      document.getElementById('outputArea').style.display = 'none';
+      document.getElementById('imgCard').style.display = 'none';
+      document.getElementById('noKeyBox').style.display = 'none';
+      document.getElementById('pubStatus').style.display = 'none';
+      curPost = ''; curImgUrl = ''; curImgPrompt = '';
 
-// ═══════════════════════════════════════
-// CALENDAR
-// ═══════════════════════════════════════
-function calPrev(){calM--;if(calM<0){calM=11;calY--;}renderCal();}
-function calNext(){calM++;if(calM>11){calM=0;calY++;}renderCal();}
-function renderCal(){
-  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('calMonthLabel').textContent=months[calM]+' '+calY;
-  var today=new Date(),firstDow=new Date(calY,calM,1).getDay(),lastD=new Date(calY,calM+1,0).getDate();
-  var off=(firstDow===0)?6:firstDow-1;
-  var html='';
-  var prevLast=new Date(calY,calM,0).getDate();
-  for(var i=off-1;i>=0;i--)html+='<div class="cal-cell dim"><div class="cal-num">'+(prevLast-i)+'</div></div>';
-  for(var d=1;d<=lastD;d++){
-    var isT=(d===today.getDate()&&calM===today.getMonth()&&calY===today.getFullYear());
-    var ds=calY+'-'+String(calM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    var dayP=scheduledPosts.filter(function(p){return p.date===ds;});
-    html+='<div class="cal-cell'+(isT?' today':'')+'" onclick="calClick(\''+ds+'\')" title="'+ds+'"><div class="cal-num">'+d+'</div>';
-    dayP.forEach(function(p){html+='<span class="cal-evt '+(p.status||'sched')+'" title="'+esc(p.postText.substring(0,60))+'">'+p.time+' '+esc(p.platforms[0])+'</span>';});
-    html+='</div>';
-  }
-  var total=off+lastD,rem=total%7;
-  if(rem!==0)for(var n=1;n<=7-rem;n++)html+='<div class="cal-cell dim"><div class="cal-num">'+n+'</div></div>';
-  document.getElementById('calBody').innerHTML=html;
-}
-function calClick(ds){document.getElementById('modalDate').value=ds;openSchedModal();}
+      btn.disabled = true; btn.textContent = 'Generating...';
 
-// ═══════════════════════════════════════
-// RESEARCH
-// ═══════════════════════════════════════
-function quickSearch(q){document.getElementById('researchQuery').value=q;doResearch();}
+      var isAll = curPlatform === 'All Platforms';
+      var req = 'Generate a ' + (isAll ? 'LinkedIn, Instagram, Facebook, X, and TikTok' : curPlatform) + ' post:\n';
+      req += '- Pillar: ' + pillar + '\n';
+      if (curSvcs.length) req += '- Services to cover: ' + curSvcs.join(', ') + '\n';
+      if (tone) req += '- Tone: ' + tone + '\n';
+      if (extra) req += '- Angle: ' + extra + '\n';
+      if (locVal) req += '- Append these location hashtags AFTER the regular hashtags: ' + locVal + '\n';
+      if (isAll) req += 'Label each: LINKEDIN: / INSTAGRAM: / FACEBOOK: / X: / TIKTOK:';
 
-async function doResearch(){
-  var q=document.getElementById('researchQuery').value.trim(); if(!q)return;
-  var btn=document.getElementById('researchBtn'),c=document.getElementById('researchResults');
-  btn.disabled=true;btn.textContent='Searching...';
-  c.innerHTML='<div class="card"><div class="load-state"><div class="spinner"></div><p style="font-size:13px;margin-top:8px;">Searching for: <strong>'+esc(q)+'</strong></p></div></div>';
-  try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for information about: "'+q+'" that is relevant to UK property management, letting agents, landlords, or property compliance. Find 4-5 relevant recent findings or facts. Return as JSON only, no markdown: {"results":[{"title":"...","finding":"2-3 sentences of the key information","source":"website or publication name","relevance":"why this matters for letting agents or landlords"}]}'}]})});
-    var d=await r.json();
-    var text=(d.content||[]).map(function(b){return b.text||'';}).join('').trim();
-    var parsed=safeParse(text);
-    if(parsed&&parsed.results&&parsed.results.length){renderResearch(parsed.results,q);}
-    else{c.innerHTML='<div class="card"><p style="color:var(--text3);font-size:13px;">No results found for that search. Try different keywords.</p></div>';}
-  }catch(e){c.innerHTML='<div class="card"><p style="color:var(--red);font-size:13px;">Search failed. Check your connection.</p></div>';}
-  btn.disabled=false;btn.textContent='🔍 Search';
-}
+      try {
+        var r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1400, system: MASTER, messages: [{ role: 'user', content: req }] }) });
+        var d = await r.json();
+        curPost = (d.content || []).map(function (b) { return b.text || ''; }).join('');
+        if (!curPost) throw new Error('No response. Check your internet connection.');
+        document.getElementById('postEdit').value = curPost;
+        document.getElementById('outputWrap').className = 'output-wrap solo';
+        document.getElementById('outputArea').style.display = 'block';
+        updateCharCnt();
+        btn.textContent = 'Building image prompt...';
+        var ir = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 180, system: IMG_SYS, messages: [{ role: 'user', content: 'Post:\n\n' + curPost }] }) });
+        var id2 = await ir.json();
+        curImgPrompt = (id2.content || []).map(function (b) { return b.text || ''; }).join('').trim();
+        if (repKey && curImgPrompt) { await genImage(repKey); }
+        else if (curImgPrompt) { document.getElementById('noKeyText').textContent = curImgPrompt; document.getElementById('noKeyBox').style.display = 'block'; }
+      } catch (e) {
+        showErrPanel(e.message || 'Something went wrong. Please try again.');
+      }
+      btn.disabled = false; btn.textContent = '✨ Generate Post + Image';
+    }
 
-function renderResearch(results,q){
-  var c=document.getElementById('researchResults');
-  var h='<div class="card" style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:700;color:var(--text);">'+results.length+' results for: <em>'+esc(q)+'</em></span><button class="btn btn-dark btn-sm" onclick="generateFromResearch(\''+esc(q)+'\')">✨ Generate Post from All Results</button></div></div>';
-  h+='<div class="research-results">';
-  results.forEach(function(r,i){
-    h+='<div class="res-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:5px;"><div class="res-title">'+esc(r.title)+'</div><span class="chip chip-blue">'+esc(r.source)+'</span></div>';
-    h+='<div class="res-body">'+esc(r.finding)+'</div>';
-    h+='<div style="font-size:11px;color:var(--gold2);font-style:italic;margin-bottom:10px;">'+esc(r.relevance)+'</div>';
-    h+='<div class="res-actions"><button class="btn btn-ghost btn-sm" onclick="genFromResult('+i+')">✨ Write Post About This</button></div>';
-    h+='</div>';
-  });
-  h+='</div>';
-  document.getElementById('researchResults').innerHTML=h;
-  window._researchResults=results;
-}
+    async function genImage(key) {
+      var k = key || document.getElementById('repKeyInp').value.trim();
+      if (!k || !curImgPrompt) return;
+      document.getElementById('outputWrap').className = 'output-wrap';
+      document.getElementById('imgCard').style.display = 'block';
+      document.getElementById('imgContainer').innerHTML = '<div class="img-placeholder"><div class="spinner"></div><span style="font-size:12px;color:var(--text4);">Generating with Flux-dev...</span></div>';
+      document.getElementById('imgActions').innerHTML = '';
+      document.getElementById('imgPromptBox').style.display = 'none';
+      var body = JSON.stringify({ input: { prompt: curImgPrompt, aspect_ratio: '1:1', output_format: 'webp', output_quality: 85 } });
+      var rUrl = 'https://api.replicate.com/v1/models/black-forest-labs/flux-dev/predictions';
+      var pUrl = 'https://corsproxy.io/?' + encodeURIComponent(rUrl);
+      var r, d, url;
+      try { r = await fetch(rUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + k, 'Prefer': 'wait=60' }, body: body }); d = await r.json(); url = Array.isArray(d.output) ? d.output[0] : d.output; } catch (e) { url = null; }
+      if (!url) { try { r = await fetch(pUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + k, 'Prefer': 'wait=60', 'x-requested-with': 'XMLHttpRequest' }, body: body }); d = await r.json(); url = Array.isArray(d.output) ? d.output[0] : d.output; } catch (e) { url = null; } }
+      if (!url && d && d.id && d.status !== 'failed') {
+        var poll = 'https://corsproxy.io/?' + encodeURIComponent('https://api.replicate.com/v1/predictions/' + d.id);
+        for (var i = 0; i < 20; i++) {
+          await new Promise(function (res) { setTimeout(res, 3000); });
+          try { var p2 = await fetch(poll, { headers: { 'Authorization': 'Bearer ' + k, 'x-requested-with': 'XMLHttpRequest' } }); var pd2 = await p2.json(); if (pd2.status === 'succeeded') { url = Array.isArray(pd2.output) ? pd2.output[0] : pd2.output; break; } if (pd2.status === 'failed') break; document.getElementById('imgContainer').innerHTML = '<div class="img-placeholder"><div class="spinner"></div><span style="font-size:12px;color:var(--text4);">Processing... ' + (i + 1) * 3 + 's</span></div>'; } catch (e2) { break; }
+        }
+      }
+      if (url && typeof url === 'string') {
+        curImgUrl = url;
+        document.getElementById('imgContainer').innerHTML = '<img src="' + url + '" class="gen-img" alt="Generated">';
+        document.getElementById('imgActions').innerHTML = '<button class="btn btn-ghost btn-sm" onclick="genImage()">↻ Redo</button><a href="' + url + '" target="_blank" class="btn btn-gold-outline btn-sm">↓ Download</a>';
+        document.getElementById('imgPromptText').textContent = curImgPrompt;
+        document.getElementById('imgPromptBox').style.display = 'block';
+      } else {
+        document.getElementById('imgContainer').innerHTML = '<div class="img-placeholder"><span style="font-size:20px;">⚠️</span><span style="font-size:12px;color:var(--text4);text-align:center;padding:0 12px;">Image failed. Check your Replicate key in Settings.<br><br>Your image prompt is shown below.</span></div>';
+        if (curImgPrompt) { document.getElementById('imgPromptText').textContent = curImgPrompt; document.getElementById('imgPromptBox').style.display = 'block'; }
+      }
+    }
 
-function genFromResult(idx){
-  var r=window._researchResults[idx];if(!r)return;
-  document.getElementById('extraCtx').value=r.title+': '+r.finding;
-  document.getElementById('pillarSel').value='Industry Insight';
-  showPage('gen');
-  setTimeout(function(){document.getElementById('extraCtx').scrollIntoView({behavior:'smooth',block:'center'});},200);
-}
+    async function rewritePost() {
+      var btn = document.getElementById('rewriteBtn'); btn.disabled = true; btn.textContent = 'Rewriting...';
+      try {
+        var r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1200, system: MASTER, messages: [{ role: 'user', content: 'Rewrite this ' + curPlatform + ' post with a completely different hook and angle. Same service.\n\n' + document.getElementById('postEdit').value }] }) });
+        var d = await r.json(); var np = (d.content || []).map(function (b) { return b.text || ''; }).join(''); if (np) { document.getElementById('postEdit').value = np; curPost = np; updateCharCnt(); }
+      } catch (e) { }
+      btn.disabled = false; btn.textContent = '🔄 Rewrite';
+    }
 
-async function generateFromResearch(q){
-  var results=window._researchResults;if(!results||!results.length)return;
-  document.getElementById('extraCtx').value='Based on research: '+q+'. Key facts: '+results.map(function(r){return r.finding;}).join(' ');
-  document.getElementById('pillarSel').value='Industry Insight';
-  showPage('gen');
-  setTimeout(generatePost,300);
-}
+    function copyPost() { navigator.clipboard.writeText(document.getElementById('postEdit').value); var b = document.getElementById('copyBtn'); b.textContent = 'Copied!'; setTimeout(function () { b.textContent = '📋 Copy'; }, 2000); }
+    function copyImgPrompt() { if (curImgPrompt) navigator.clipboard.writeText(curImgPrompt); }
+    function copyMaster() { navigator.clipboard.writeText(MASTER); var b = document.getElementById('copyMasterBtn'); b.textContent = 'Copied!'; setTimeout(function () { b.textContent = '📋 Copy'; }, 2000); }
 
-// ═══════════════════════════════════════
-// TRENDING
-// ═══════════════════════════════════════
-async function fetchTrends(){
-  var btn=document.getElementById('trendBtn'),c=document.getElementById('trendContainer');
-  btn.disabled=true;btn.textContent='...';
-  c.innerHTML='<div class="load-state"><div class="spinner"></div><p>Searching...</p></div>';
-  try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for 5 trending social media topics in the last 2 weeks relevant to UK landlords, letting agents or property managers. Return JSON only: {"trends":[{"topic":"title","platform":"LinkedIn etc","why":"2 sentences","angle":"S2F post angle"}]}'}]})});
-    var d=await r.json();var text=(d.content||[]).map(function(b){return b.text||'';}).join('').trim();
-    var p=safeParse(text);if(p&&p.trends&&p.trends.length){trendData=p.trends;renderTrends();}
-    else c.innerHTML='<div class="empty"><p>Could not load. <button class="btn btn-gold-outline btn-sm" onclick="fetchTrends()" style="margin-top:8px;">Retry</button></p></div>';
-  }catch(e){c.innerHTML='<div class="empty"><p style="color:var(--red);">Error. <button class="btn btn-ghost btn-sm" onclick="fetchTrends()" style="margin-top:8px;">Retry</button></p></div>';}
-  btn.disabled=false;btn.textContent='↻ Refresh';
-}
-function renderTrends(){
-  var c=document.getElementById('trendContainer'),h='';
-  trendData.forEach(function(t,i){h+='<div class="trend-card"><div class="trend-platform">'+esc(t.platform)+'</div><div class="trend-title">🔥 '+esc(t.topic)+'</div><div class="trend-why">'+esc(t.why)+'</div><div class="trend-angle">S2F angle: '+esc(t.angle)+'</div><button class="trend-use-btn" onclick="useTrend('+i+')">✨ Use This Topic</button></div>';});
-  c.innerHTML=h;
-}
-function useTrend(i){var t=trendData[i];if(!t)return;document.getElementById('extraCtx').value='Topic: '+t.topic+' | Angle: '+t.angle;document.getElementById('pillarSel').value='Industry Insight';showPage('gen');}
+    // ═══════════════════════════════════════
+    // HISTORY
+    // ═══════════════════════════════════════
+    function saveToHist() {
+      var text = document.getElementById('postEdit').value.trim(); if (!text) return;
+      postHistory.unshift({ id: Date.now(), platform: curPlatform, pillar: document.getElementById('pillarSel').value, svc: curSvcs.join(', ') || '', post: text, imgUrl: curImgUrl, imgPrompt: curImgPrompt, time: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) });
+      updateHistBadge(); renderHist();
+      var sc = document.getElementById('saveConf'); sc.style.display = 'inline'; setTimeout(function () { sc.style.display = 'none'; }, 2500);
+    }
+    function updateHistBadge() {
+      var b = document.getElementById('histBadge'), c = document.getElementById('histCount');
+      b.textContent = postHistory.length; b.style.display = postHistory.length ? 'inline' : 'none'; c.textContent = postHistory.length;
+      document.getElementById('clearHistBtn').style.display = postHistory.length ? 'inline-flex' : 'none';
+    }
+    function renderHist() {
+      var c = document.getElementById('histContainer');
+      if (!postHistory.length) { c.innerHTML = '<div class="empty"><div class="empty-emoji">📭</div><div class="empty-title">No posts saved yet</div><div class="empty-sub">Generate a post and click Save to History.</div></div>'; return; }
+      var h = '<div class="hist-grid">';
+      postHistory.forEach(function (e) {
+        h += '<div class="hist-card">';
+        h += e.imgUrl ? '<img src="' + e.imgUrl + '" class="hist-thumb" alt="">' : '<div class="hist-thumb-ph">🏠</div>';
+        h += '<div class="hist-body"><div class="hist-chips"><span class="chip chip-gold">' + esc(e.platform) + '</span><span class="chip chip-green">' + esc(e.pillar) + '</span>';
+        if (e.svc) h += '<span class="chip chip-blue">' + esc(e.svc) + '</span>';
+        h += '</div><div class="hist-text">' + esc(e.post) + '</div>';
+        h += '<div class="hist-footer"><button class="btn btn-ghost btn-sm" onclick="copyHist(' + e.id + ')">📋 Copy</button>';
+        if (e.imgUrl) h += '<a href="' + e.imgUrl + '" target="_blank" class="btn btn-ghost btn-sm">↓ Image</a>';
+        h += '<button class="btn btn-ghost btn-sm" onclick="useHist(' + e.id + ')" style="color:var(--green2);">↩ Use</button>';
+        h += '<button class="btn btn-danger btn-sm" onclick="delHist(' + e.id + ')">🗑</button>';
+        h += '</div><div class="hist-time">' + e.time + '</div></div></div>';
+      });
+      h += '</div>'; c.innerHTML = h;
+    }
+    function copyHist(id) { var e = postHistory.find(function (x) { return x.id === id; }); if (e) navigator.clipboard.writeText(e.post); }
+    function useHist(id) {
+      var e = postHistory.find(function (x) { return x.id === id; }); if (!e) return;
+      curPost = e.post; curImgUrl = e.imgUrl; curImgPrompt = e.imgPrompt;
+      document.getElementById('postEdit').value = e.post;
+      document.getElementById('outputArea').style.display = 'block';
+      if (e.imgUrl) { document.getElementById('outputWrap').className = 'output-wrap'; document.getElementById('imgCard').style.display = 'block'; document.getElementById('imgContainer').innerHTML = '<img src="' + e.imgUrl + '" class="gen-img">'; document.getElementById('imgActions').innerHTML = '<a href="' + e.imgUrl + '" target="_blank" class="btn btn-gold-outline btn-sm">↓ Download</a>'; document.getElementById('imgPromptBox').style.display = 'none'; }
+      showPage('gen'); updateCharCnt();
+    }
+    function delHist(id) { postHistory = postHistory.filter(function (x) { return x.id !== id; }); updateHistBadge(); renderHist(); }
+    function clearHist() { if (confirm('Clear all saved posts?')) { postHistory = []; updateHistBadge(); renderHist(); } }
 
-async function fetchNews(){
-  var btn=document.getElementById('newsBtn'),c=document.getElementById('newsContainer');
-  btn.disabled=true;btn.textContent='...';
-  c.innerHTML='<div class="load-state"><div class="spinner"></div><p>Searching...</p></div>';
-  try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for 5 recent UK property lettings news stories in the last 30 days. EPC, Section 21, Renters Rights Act, Legionella, fire safety. Return JSON only: {"news":[{"headline":"...","date":"...","summary":"2-3 sentences","relevance":"why it matters"}]}'}]})});
-    var d=await r.json();var text=(d.content||[]).map(function(b){return b.text||'';}).join('').trim();
-    var p=safeParse(text);if(p&&p.news&&p.news.length){newsData=p.news;renderNews();}
-    else c.innerHTML='<div class="empty"><p>Could not load. <button class="btn btn-gold-outline btn-sm" onclick="fetchNews()" style="margin-top:8px;">Retry</button></p></div>';
-  }catch(e){c.innerHTML='<div class="empty"><p style="color:var(--red);">Error. <button class="btn btn-ghost btn-sm" onclick="fetchNews()" style="margin-top:8px;">Retry</button></p></div>';}
-  btn.disabled=false;btn.textContent='↻ Refresh';
-}
-function renderNews(){
-  var c=document.getElementById('newsContainer'),h='';
-  newsData.forEach(function(n,i){h+='<div class="news-card"><div class="news-date">📅 '+esc(n.date)+'</div><div class="news-hl">'+esc(n.headline)+'</div><div class="news-body">'+esc(n.summary)+'</div><div class="news-rel">'+esc(n.relevance)+'</div><button class="btn btn-ghost btn-sm" onclick="useNews('+i+')" style="color:var(--green2);">✨ Write Post</button></div>';});
-  c.innerHTML=h;
-}
-function useNews(i){var n=newsData[i];if(!n)return;document.getElementById('extraCtx').value='News: '+n.headline;document.getElementById('pillarSel').value='Industry Insight';showPage('gen');}
+    // ═══════════════════════════════════════
+    // PUBLISH
+    // ═══════════════════════════════════════
+    async function postNow() {
+      var text = document.getElementById('postEdit').value.trim(); if (!text) { showPub('pub-err', 'No post text.'); return; }
+      var wh = document.getElementById('webhookInp').value.trim() || 'https://robertpjd1.app.n8n.cloud/webhook/s2f-post';
+      var plats = getCheckedPlats('p_'); if (!plats.length) { showPub('pub-err', 'Select at least one platform.'); return; }
+      var btn = document.getElementById('postNowBtn'); btn.disabled = true; btn.textContent = 'Posting...';
+      showPub('pub-info', 'Sending to n8n...');
+      try {
+        var r = await fetch(wh, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postText: text, platform: plats.join(', '), imageUrl: curImgUrl || '', isScheduled: false }) });
+        if (r.ok || r.status === 200) { showPub('pub-ok', '🚀 Sent! Publishing to ' + plats.join(', ') + ' via Blotato...'); saveToHist(); }
+        else { showPub('pub-err', 'n8n returned ' + r.status + '. Check webhook is active.'); }
+      } catch (e) { showPub('pub-warn', '⚠️ CORS blocked — host on GitHub Pages for Post Now to work. Your post text is ready to copy above.'); }
+      btn.disabled = false; btn.textContent = '🚀 Post Now';
+    }
+    function getCheckedPlats(pfx) {
+      var p = []; if (document.getElementById(pfx + 'li').checked) p.push('LinkedIn'); if (document.getElementById(pfx + 'ig').checked) p.push('Instagram'); if (document.getElementById(pfx + 'fb').checked) p.push('Facebook'); if (document.getElementById(pfx + 'tt').checked) p.push('TikTok'); if (document.getElementById(pfx + 'x').checked) p.push('Twitter'); return p;
+    }
+    function showPub(cls, msg) { var el = document.getElementById('pubStatus'); el.className = 'pub-status ' + cls; el.innerHTML = msg; el.style.display = 'block'; }
 
-// ═══════════════════════════════════════
-// SETTINGS
-// ═══════════════════════════════════════
-function saveRepKey(){var k=document.getElementById('repKeyInp').value.trim();if(k.startsWith('r8_')&&k.length>10){localStorage.setItem('s2f_rep_key',k);document.getElementById('repKeySaved').style.display='block';}else{localStorage.removeItem('s2f_rep_key');document.getElementById('repKeySaved').style.display='none';}}
-function toggleRepKey(){var i=document.getElementById('repKeyInp'),b=document.getElementById('repRevealBtn');if(i.type==='password'){i.type='text';b.textContent='Hide';}else{i.type='password';b.textContent='Show';}}
-function saveWebhook(){var u=document.getElementById('webhookInp').value.trim();if(u)localStorage.setItem('s2f_webhook',u);}
-function changePass(){
-  var p1=document.getElementById('newP1').value.trim(),p2=document.getElementById('newP2').value.trim();
-  var msg=document.getElementById('passMsg');msg.style.display='block';
-  if(!p1){msg.textContent='Enter a new password.';msg.style.color='var(--red)';return;}
-  if(p1.length<4){msg.textContent='Minimum 4 characters.';msg.style.color='var(--red)';return;}
-  if(p1!==p2){msg.textContent='Passwords do not match.';msg.style.color='var(--red)';return;}
-  PASS=p1;localStorage.setItem('s2f_pass',p1);
-  msg.textContent='✓ Password updated successfully.';msg.style.color='var(--green3)';
-  document.getElementById('newP1').value='';document.getElementById('newP2').value='';
-}
+    // ═══════════════════════════════════════
+    // SCHEDULE
+    // ═══════════════════════════════════════
+    function openSchedModal() {
+      var cur = document.getElementById('postEdit') ? document.getElementById('postEdit').value : '';
+      document.getElementById('modalPost').value = cur;
+      var tm = new Date(); tm.setDate(tm.getDate() + 1);
+      document.getElementById('modalDate').value = tm.toISOString().split('T')[0];
+      document.getElementById('modalStatus').style.display = 'none';
+      document.getElementById('schedModal').classList.add('open');
+    }
+    function closeSchedModal() { document.getElementById('schedModal').classList.remove('open'); }
+    document.getElementById('schedModal').addEventListener('click', function (e) { if (e.target === this) closeSchedModal(); });
 
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-// ═══════════════════════════════════════
-// ERROR PANEL
-// ═══════════════════════════════════════
-var _lastErrContext = '';
-function showErrPanel(msg) {
-  _lastErrContext = 'Platform: ' + curPlatform + '\nServices: ' + (curSvcs.join(', ')||'none') + '\nAreas: ' + (curAreas.map(function(a){return a.name;}).join(', ')||'none') + '\nPillar: ' + document.getElementById('pillarSel').value + '\nExtra context: ' + (document.getElementById('extraCtx').value||'none');
-  document.getElementById('errMsg').textContent = msg;
-  document.getElementById('errNote').value = '';
-  document.getElementById('errSentMsg').style.display = 'none';
-  document.getElementById('errPanel').style.display = 'block';
-  document.getElementById('errPanel').scrollIntoView({behavior:'smooth', block:'nearest'});
-}
-function closeErrPanel() {
-  document.getElementById('errPanel').style.display = 'none';
-}
-function sendErrEmail() {
-  var errMsg = document.getElementById('errMsg').textContent;
-  var note = document.getElementById('errNote').value.trim();
-  var ts = new Date().toLocaleString('en-GB');
-  var body = 'S2F Dashboard Error Report\n' +
-    '==========================\n' +
-    'Time: ' + ts + '\n\n' +
-    'Error:\n' + errMsg + '\n\n' +
-    'Context:\n' + _lastErrContext + '\n\n' +
-    (note ? 'User note:\n' + note + '\n\n' : '') +
-    'Dashboard: S2F Content Studio V5';
-  var subject = 'S2F Dashboard Error — ' + ts;
-  var mailto = 'mailto:robertpjd1@gmail.com' +
-    '?subject=' + encodeURIComponent(subject) +
-    '&body=' + encodeURIComponent(body);
-  window.location.href = mailto;
-  document.getElementById('errSentMsg').style.display = 'block';
-}
+    async function confirmSched() {
+      var text = document.getElementById('modalPost').value.trim(), date = document.getElementById('modalDate').value, time = document.getElementById('modalTime').value || '09:00';
+      if (!text) { showModalSt('pub-err', 'Enter post text.'); return; }
+      if (!date) { showModalSt('pub-err', 'Pick a date.'); return; }
+      var plats = getCheckedPlats('m_'); if (!plats.length) { showModalSt('pub-err', 'Select platform.'); return; }
+      scheduledPosts.push({ id: Date.now(), postText: text, date: date, time: time, platforms: plats, imgUrl: curImgUrl || '', status: 'scheduled' });
+      localStorage.setItem('s2f_sched', JSON.stringify(scheduledPosts));
+      var wh = document.getElementById('webhookInp').value.trim() || 'https://robertpjd1.app.n8n.cloud/webhook/s2f-post';
+      try { await fetch(wh, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postText: text, platform: plats.join(', '), imageUrl: curImgUrl || '', scheduledFor: date + 'T' + time + ':00', isScheduled: true }) }); } catch (e) { }
+      showModalSt('pub-ok', '✅ Scheduled for ' + date + ' at ' + time);
+      renderCal();
+      setTimeout(closeSchedModal, 1800);
+    }
+    function showModalSt(cls, msg) { var el = document.getElementById('modalStatus'); el.className = 'modal-status ' + cls; el.innerHTML = msg; el.style.display = 'block'; }
 
-function safeParse(t){try{var c=t.replace(/```json|```/g,'').trim();var s=c.indexOf('{'),e=c.lastIndexOf('}');if(s===-1||e===-1)return null;return JSON.parse(c.substring(s,e+1));}catch(e){return null;}}
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    // ═══════════════════════════════════════
+    // CALENDAR
+    // ═══════════════════════════════════════
+    function calPrev() { calM--; if (calM < 0) { calM = 11; calY--; } renderCal(); }
+    function calNext() { calM++; if (calM > 11) { calM = 0; calY++; } renderCal(); }
+    function renderCal() {
+      var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      document.getElementById('calMonthLabel').textContent = months[calM] + ' ' + calY;
+      var today = new Date(), firstDow = new Date(calY, calM, 1).getDay(), lastD = new Date(calY, calM + 1, 0).getDate();
+      var off = (firstDow === 0) ? 6 : firstDow - 1;
+      var html = '';
+      var prevLast = new Date(calY, calM, 0).getDate();
+      for (var i = off - 1; i >= 0; i--)html += '<div class="cal-cell dim"><div class="cal-num">' + (prevLast - i) + '</div></div>';
+      for (var d = 1; d <= lastD; d++) {
+        var isT = (d === today.getDate() && calM === today.getMonth() && calY === today.getFullYear());
+        var ds = calY + '-' + String(calM + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        var dayP = scheduledPosts.filter(function (p) { return p.date === ds; });
+        html += '<div class="cal-cell' + (isT ? ' today' : '') + '" onclick="calClick(\'' + ds + '\')" title="' + ds + '"><div class="cal-num">' + d + '</div>';
+        dayP.forEach(function (p) { html += '<span class="cal-evt ' + (p.status || 'sched') + '" title="' + esc(p.postText.substring(0, 60)) + '">' + p.time + ' ' + esc(p.platforms[0]) + '</span>'; });
+        html += '</div>';
+      }
+      var total = off + lastD, rem = total % 7;
+      if (rem !== 0) for (var n = 1; n <= 7 - rem; n++)html += '<div class="cal-cell dim"><div class="cal-num">' + n + '</div></div>';
+      document.getElementById('calBody').innerHTML = html;
+    }
+    function calClick(ds) { document.getElementById('modalDate').value = ds; openSchedModal(); }
 
-// Init
-renderCal();
-</script>
+    // ═══════════════════════════════════════
+    // RESEARCH
+    // ═══════════════════════════════════════
+    function quickSearch(q) { document.getElementById('researchQuery').value = q; doResearch(); }
+
+    async function doResearch() {
+      var q = document.getElementById('researchQuery').value.trim(); if (!q) return;
+      var btn = document.getElementById('researchBtn'), c = document.getElementById('researchResults');
+      btn.disabled = true; btn.textContent = 'Searching...';
+      c.innerHTML = '<div class="card"><div class="load-state"><div class="spinner"></div><p style="font-size:13px;margin-top:8px;">Searching for: <strong>' + esc(q) + '</strong></p></div></div>';
+      try {
+        var r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2500, tools: [{ "type": "web_search_20250305", "name": "web_search" }], messages: [{ role: 'user', content: 'Search for information about: "' + q + '" that is relevant to UK property management, letting agents, landlords, or property compliance. Find 4-5 relevant recent findings or facts. Return as JSON only, no markdown: {"results":[{"title":"...","finding":"2-3 sentences of the key information","source":"website or publication name","relevance":"why this matters for letting agents or landlords"}]}' }] }) });
+        var d = await r.json();
+        var text = (d.content || []).map(function (b) { return b.text || ''; }).join('').trim();
+        var parsed = safeParse(text);
+        if (parsed && parsed.results && parsed.results.length) { renderResearch(parsed.results, q); }
+        else { c.innerHTML = '<div class="card"><p style="color:var(--text3);font-size:13px;">No results found for that search. Try different keywords.</p></div>'; }
+      } catch (e) { c.innerHTML = '<div class="card"><p style="color:var(--red);font-size:13px;">Search failed. Check your connection.</p></div>'; }
+      btn.disabled = false; btn.textContent = '🔍 Search';
+    }
+
+    function renderResearch(results, q) {
+      var c = document.getElementById('researchResults');
+      var h = '<div class="card" style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:700;color:var(--text);">' + results.length + ' results for: <em>' + esc(q) + '</em></span><button class="btn btn-dark btn-sm" onclick="generateFromResearch(\'' + esc(q) + '\')">✨ Generate Post from All Results</button></div></div>';
+      h += '<div class="research-results">';
+      results.forEach(function (r, i) {
+        h += '<div class="res-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:5px;"><div class="res-title">' + esc(r.title) + '</div><span class="chip chip-blue">' + esc(r.source) + '</span></div>';
+        h += '<div class="res-body">' + esc(r.finding) + '</div>';
+        h += '<div style="font-size:11px;color:var(--gold2);font-style:italic;margin-bottom:10px;">' + esc(r.relevance) + '</div>';
+        h += '<div class="res-actions"><button class="btn btn-ghost btn-sm" onclick="genFromResult(' + i + ')">✨ Write Post About This</button></div>';
+        h += '</div>';
+      });
+      h += '</div>';
+      document.getElementById('researchResults').innerHTML = h;
+      window._researchResults = results;
+    }
+
+    function genFromResult(idx) {
+      var r = window._researchResults[idx]; if (!r) return;
+      document.getElementById('extraCtx').value = r.title + ': ' + r.finding;
+      document.getElementById('pillarSel').value = 'Industry Insight';
+      showPage('gen');
+      setTimeout(function () { document.getElementById('extraCtx').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 200);
+    }
+
+    async function generateFromResearch(q) {
+      var results = window._researchResults; if (!results || !results.length) return;
+      document.getElementById('extraCtx').value = 'Based on research: ' + q + '. Key facts: ' + results.map(function (r) { return r.finding; }).join(' ');
+      document.getElementById('pillarSel').value = 'Industry Insight';
+      showPage('gen');
+      setTimeout(generatePost, 300);
+    }
+
+    // ═══════════════════════════════════════
+    // TRENDING
+    // ═══════════════════════════════════════
+    async function fetchTrends() {
+      var btn = document.getElementById('trendBtn'), c = document.getElementById('trendContainer');
+      btn.disabled = true; btn.textContent = '...';
+      c.innerHTML = '<div class="load-state"><div class="spinner"></div><p>Searching...</p></div>';
+      try {
+        var r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, tools: [{ "type": "web_search_20250305", "name": "web_search" }], messages: [{ role: 'user', content: 'Search for 5 trending social media topics in the last 2 weeks relevant to UK landlords, letting agents or property managers. Return JSON only: {"trends":[{"topic":"title","platform":"LinkedIn etc","why":"2 sentences","angle":"S2F post angle"}]}' }] }) });
+        var d = await r.json(); var text = (d.content || []).map(function (b) { return b.text || ''; }).join('').trim();
+        var p = safeParse(text); if (p && p.trends && p.trends.length) { trendData = p.trends; renderTrends(); }
+        else c.innerHTML = '<div class="empty"><p>Could not load. <button class="btn btn-gold-outline btn-sm" onclick="fetchTrends()" style="margin-top:8px;">Retry</button></p></div>';
+      } catch (e) { c.innerHTML = '<div class="empty"><p style="color:var(--red);">Error. <button class="btn btn-ghost btn-sm" onclick="fetchTrends()" style="margin-top:8px;">Retry</button></p></div>'; }
+      btn.disabled = false; btn.textContent = '↻ Refresh';
+    }
+    function renderTrends() {
+      var c = document.getElementById('trendContainer'), h = '';
+      trendData.forEach(function (t, i) { h += '<div class="trend-card"><div class="trend-platform">' + esc(t.platform) + '</div><div class="trend-title">🔥 ' + esc(t.topic) + '</div><div class="trend-why">' + esc(t.why) + '</div><div class="trend-angle">S2F angle: ' + esc(t.angle) + '</div><button class="trend-use-btn" onclick="useTrend(' + i + ')">✨ Use This Topic</button></div>'; });
+      c.innerHTML = h;
+    }
+    function useTrend(i) { var t = trendData[i]; if (!t) return; document.getElementById('extraCtx').value = 'Topic: ' + t.topic + ' | Angle: ' + t.angle; document.getElementById('pillarSel').value = 'Industry Insight'; showPage('gen'); }
+
+    async function fetchNews() {
+      var btn = document.getElementById('newsBtn'), c = document.getElementById('newsContainer');
+      btn.disabled = true; btn.textContent = '...';
+      c.innerHTML = '<div class="load-state"><div class="spinner"></div><p>Searching...</p></div>';
+      try {
+        var r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, tools: [{ "type": "web_search_20250305", "name": "web_search" }], messages: [{ role: 'user', content: 'Search for 5 recent UK property lettings news stories in the last 30 days. EPC, Section 21, Renters Rights Act, Legionella, fire safety. Return JSON only: {"news":[{"headline":"...","date":"...","summary":"2-3 sentences","relevance":"why it matters"}]}' }] }) });
+        var d = await r.json(); var text = (d.content || []).map(function (b) { return b.text || ''; }).join('').trim();
+        var p = safeParse(text); if (p && p.news && p.news.length) { newsData = p.news; renderNews(); }
+        else c.innerHTML = '<div class="empty"><p>Could not load. <button class="btn btn-gold-outline btn-sm" onclick="fetchNews()" style="margin-top:8px;">Retry</button></p></div>';
+      } catch (e) { c.innerHTML = '<div class="empty"><p style="color:var(--red);">Error. <button class="btn btn-ghost btn-sm" onclick="fetchNews()" style="margin-top:8px;">Retry</button></p></div>'; }
+      btn.disabled = false; btn.textContent = '↻ Refresh';
+    }
+    function renderNews() {
+      var c = document.getElementById('newsContainer'), h = '';
+      newsData.forEach(function (n, i) { h += '<div class="news-card"><div class="news-date">📅 ' + esc(n.date) + '</div><div class="news-hl">' + esc(n.headline) + '</div><div class="news-body">' + esc(n.summary) + '</div><div class="news-rel">' + esc(n.relevance) + '</div><button class="btn btn-ghost btn-sm" onclick="useNews(' + i + ')" style="color:var(--green2);">✨ Write Post</button></div>'; });
+      c.innerHTML = h;
+    }
+    function useNews(i) { var n = newsData[i]; if (!n) return; document.getElementById('extraCtx').value = 'News: ' + n.headline; document.getElementById('pillarSel').value = 'Industry Insight'; showPage('gen'); }
+
+    // ═══════════════════════════════════════
+    // SETTINGS
+    // ═══════════════════════════════════════
+    function saveRepKey() { var k = document.getElementById('repKeyInp').value.trim(); if (k.startsWith('r8_') && k.length > 10) { localStorage.setItem('s2f_rep_key', k); document.getElementById('repKeySaved').style.display = 'block'; } else { localStorage.removeItem('s2f_rep_key'); document.getElementById('repKeySaved').style.display = 'none'; } }
+    function toggleRepKey() { var i = document.getElementById('repKeyInp'), b = document.getElementById('repRevealBtn'); if (i.type === 'password') { i.type = 'text'; b.textContent = 'Hide'; } else { i.type = 'password'; b.textContent = 'Show'; } }
+    function saveWebhook() { var u = document.getElementById('webhookInp').value.trim(); if (u) localStorage.setItem('s2f_webhook', u); }
+    function changePass() {
+      var p1 = document.getElementById('newP1').value.trim(), p2 = document.getElementById('newP2').value.trim();
+      var msg = document.getElementById('passMsg'); msg.style.display = 'block';
+      if (!p1) { msg.textContent = 'Enter a new password.'; msg.style.color = 'var(--red)'; return; }
+      if (p1.length < 4) { msg.textContent = 'Minimum 4 characters.'; msg.style.color = 'var(--red)'; return; }
+      if (p1 !== p2) { msg.textContent = 'Passwords do not match.'; msg.style.color = 'var(--red)'; return; }
+      PASS = p1; localStorage.setItem('s2f_pass', p1);
+      msg.textContent = '✓ Password updated successfully.'; msg.style.color = 'var(--green3)';
+      document.getElementById('newP1').value = ''; document.getElementById('newP2').value = '';
+    }
+
+    // ═══════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════
+    // ═══════════════════════════════════════
+    // ERROR PANEL
+    // ═══════════════════════════════════════
+    var _lastErrContext = '';
+    function showErrPanel(msg) {
+      _lastErrContext = 'Platform: ' + curPlatform + '\nServices: ' + (curSvcs.join(', ') || 'none') + '\nAreas: ' + (curAreas.map(function (a) { return a.name; }).join(', ') || 'none') + '\nPillar: ' + document.getElementById('pillarSel').value + '\nExtra context: ' + (document.getElementById('extraCtx').value || 'none');
+      document.getElementById('errMsg').textContent = msg;
+      document.getElementById('errNote').value = '';
+      document.getElementById('errSentMsg').style.display = 'none';
+      document.getElementById('errPanel').style.display = 'block';
+      document.getElementById('errPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function closeErrPanel() {
+      document.getElementById('errPanel').style.display = 'none';
+    }
+    function sendErrEmail() {
+      var errMsg = document.getElementById('errMsg').textContent;
+      var note = document.getElementById('errNote').value.trim();
+      var ts = new Date().toLocaleString('en-GB');
+      var body = 'S2F Dashboard Error Report\n' +
+        '==========================\n' +
+        'Time: ' + ts + '\n\n' +
+        'Error:\n' + errMsg + '\n\n' +
+        'Context:\n' + _lastErrContext + '\n\n' +
+        (note ? 'User note:\n' + note + '\n\n' : '') +
+        'Dashboard: S2F Content Studio V5';
+      var subject = 'S2F Dashboard Error — ' + ts;
+      var mailto = 'mailto:robertpjd1@gmail.com' +
+        '?subject=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(body);
+      window.location.href = mailto;
+      document.getElementById('errSentMsg').style.display = 'block';
+    }
+
+    function safeParse(t) { try { var c = t.replace(/```json|```/g, '').trim(); var s = c.indexOf('{'), e = c.lastIndexOf('}'); if (s === -1 || e === -1) return null; return JSON.parse(c.substring(s, e + 1)); } catch (e) { return null; } }
+    function esc(s) { if (!s) return ''; return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+    // Init
+    renderCal();
+  </script>
 </body>
+
 </html>
