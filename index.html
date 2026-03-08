@@ -1052,7 +1052,7 @@ async function postNow() {
   var btn=document.getElementById('postNowBtn'); btn.disabled=true; btn.textContent='Posting...';
   showPub('pub-info','Sending to n8n...');
   try {
-    var r=await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postText:text,platform:plats.join(', '),imageUrl:curImgUrl||'',isScheduled:false})});
+    var r=await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postText:text,platform:plats.join(', '),imageUrl:curImgUrl||'',imagePrompt:curImgPrompt||'',isScheduled:false})});
     if(r.ok||r.status===200){showPub('pub-ok','🚀 Sent! Publishing to '+plats.join(', ')+' via Blotato...');saveToHist();}
     else{showPub('pub-err','n8n returned '+r.status+'. Check webhook is active.');}
   } catch(e){ showPub('pub-warn','⚠️ CORS blocked — host on GitHub Pages for Post Now to work. Your post text is ready to copy above.'); }
@@ -1085,7 +1085,7 @@ async function confirmSched(){
   scheduledPosts.push({id:Date.now(),postText:text,date:date,time:time,platforms:plats,imgUrl:curImgUrl||'',status:'scheduled'});
   localStorage.setItem('s2f_sched',JSON.stringify(scheduledPosts));
   var wh=document.getElementById('webhookInp').value.trim()||'https://robertpjd1.app.n8n.cloud/webhook/s2f-post';
-  try{await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postText:text,platform:plats.join(', '),imageUrl:curImgUrl||'',scheduledFor:date+'T'+time+':00',isScheduled:true})});}catch(e){}
+  try{await fetch(wh,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postText:text,platform:plats.join(', '),imageUrl:curImgUrl||'',imagePrompt:curImgPrompt||'',scheduledFor:date+'T'+time+':00',isScheduled:true})});}catch(e){}
   showModalSt('pub-ok','✅ Scheduled for '+date+' at '+time);
   renderCal();
   setTimeout(closeSchedModal,1800);
