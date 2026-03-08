@@ -932,7 +932,7 @@ async function generatePost() {
   if (isAll) req += 'Label each: LINKEDIN: / INSTAGRAM: / FACEBOOK: / X: / TIKTOK:';
 
   try {
-    var r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||'')},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,system:MASTER,messages:[{role:'user',content:req}]})});
+    var r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||''),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1400,system:MASTER,messages:[{role:'user',content:req}]})});
     var d = await r.json();
     curPost = (d.content||[]).map(function(b){return b.text||'';}).join('');
     if (!curPost) throw new Error('No response. Check your internet connection.');
@@ -941,7 +941,7 @@ async function generatePost() {
     document.getElementById('outputArea').style.display = 'block';
     updateCharCnt();
     btn.textContent='Building image prompt...';
-    var ir = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||'')},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:180,system:IMG_SYS,messages:[{role:'user',content:'Post:\n\n'+curPost}]})});
+    var ir = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||''),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:180,system:IMG_SYS,messages:[{role:'user',content:'Post:\n\n'+curPost}]})});
     var id2 = await ir.json();
     curImgPrompt = (id2.content||[]).map(function(b){return b.text||'';}).join('').trim();
     if (repKey && curImgPrompt) { await genImage(repKey); }
@@ -988,7 +988,7 @@ async function genImage(key) {
 async function rewritePost() {
   var btn=document.getElementById('rewriteBtn'); btn.disabled=true; btn.textContent='Rewriting...';
   try {
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||'')},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,system:MASTER,messages:[{role:'user',content:'Rewrite this '+curPlatform+' post with a completely different hook and angle. Same service.\n\n'+document.getElementById('postEdit').value}]})});
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||''),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,system:MASTER,messages:[{role:'user',content:'Rewrite this '+curPlatform+' post with a completely different hook and angle. Same service.\n\n'+document.getElementById('postEdit').value}]})});
     var d=await r.json(); var np=(d.content||[]).map(function(b){return b.text||'';}).join(''); if(np){document.getElementById('postEdit').value=np;curPost=np;updateCharCnt();}
   } catch(e){}
   btn.disabled=false; btn.textContent='🔄 Rewrite';
@@ -1130,7 +1130,7 @@ async function doResearch(){
   btn.disabled=true;btn.textContent='Searching...';
   c.innerHTML='<div class="card"><div class="load-state"><div class="spinner"></div><p style="font-size:13px;margin-top:8px;">Searching for: <strong>'+esc(q)+'</strong></p></div></div>';
   try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||'')},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for information about: "'+q+'" that is relevant to UK property management, letting agents, landlords, or property compliance. Find 4-5 relevant recent findings or facts. Return as JSON only, no markdown: {"results":[{"title":"...","finding":"2-3 sentences of the key information","source":"website or publication name","relevance":"why this matters for letting agents or landlords"}]}'}]})});
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||''),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for information about: "'+q+'" that is relevant to UK property management, letting agents, landlords, or property compliance. Find 4-5 relevant recent findings or facts. Return as JSON only, no markdown: {"results":[{"title":"...","finding":"2-3 sentences of the key information","source":"website or publication name","relevance":"why this matters for letting agents or landlords"}]}'}]})});
     var d=await r.json();
     var text=(d.content||[]).map(function(b){return b.text||'';}).join('').trim();
     var parsed=safeParse(text);
@@ -1180,7 +1180,7 @@ async function fetchTrends(){
   btn.disabled=true;btn.textContent='...';
   c.innerHTML='<div class="load-state"><div class="spinner"></div><p>Searching...</p></div>';
   try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||'')},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for 5 trending social media topics in the last 2 weeks relevant to UK landlords, letting agents or property managers. Return JSON only: {"trends":[{"topic":"title","platform":"LinkedIn etc","why":"2 sentences","angle":"S2F post angle"}]}'}]})});
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||''),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for 5 trending social media topics in the last 2 weeks relevant to UK landlords, letting agents or property managers. Return JSON only: {"trends":[{"topic":"title","platform":"LinkedIn etc","why":"2 sentences","angle":"S2F post angle"}]}'}]})});
     var d=await r.json();var text=(d.content||[]).map(function(b){return b.text||'';}).join('').trim();
     var p=safeParse(text);if(p&&p.trends&&p.trends.length){trendData=p.trends;renderTrends();}
     else c.innerHTML='<div class="empty"><p>Could not load. <button class="btn btn-gold-outline btn-sm" onclick="fetchTrends()" style="margin-top:8px;">Retry</button></p></div>';
@@ -1199,7 +1199,7 @@ async function fetchNews(){
   btn.disabled=true;btn.textContent='...';
   c.innerHTML='<div class="load-state"><div class="spinner"></div><p>Searching...</p></div>';
   try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||'')},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for 5 recent UK property lettings news stories in the last 30 days. EPC, Section 21, Renters Rights Act, Legionella, fire safety. Return JSON only: {"news":[{"headline":"...","date":"...","summary":"2-3 sentences","relevance":"why it matters"}]}'}]})});
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':(localStorage.getItem('s2f_ant_key')||''),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:'user',content:'Search for 5 recent UK property lettings news stories in the last 30 days. EPC, Section 21, Renters Rights Act, Legionella, fire safety. Return JSON only: {"news":[{"headline":"...","date":"...","summary":"2-3 sentences","relevance":"why it matters"}]}'}]})});
     var d=await r.json();var text=(d.content||[]).map(function(b){return b.text||'';}).join('').trim();
     var p=safeParse(text);if(p&&p.news&&p.news.length){newsData=p.news;renderNews();}
     else c.innerHTML='<div class="empty"><p>Could not load. <button class="btn btn-gold-outline btn-sm" onclick="fetchNews()" style="margin-top:8px;">Retry</button></p></div>';
