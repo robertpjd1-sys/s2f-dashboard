@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { createClient } from "@supabase/supabase-js";
 
 export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from("kb_documents")
-    .select("*")
-    .order("uploaded_at", { ascending: false });
+  try {
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { data, error } = await supabaseAdmin
+      .from("kb_documents")
+      .select("*")
+      .order("uploaded_at", { ascending: false });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || "Unknown error" }, { status: 500 });
   }
-
-  return NextResponse.json(data);
 }
