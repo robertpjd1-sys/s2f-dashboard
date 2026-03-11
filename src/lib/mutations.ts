@@ -6,7 +6,6 @@ export function useActivateClerk() {
 
   return useMutation({
     mutationFn: async ({ id, email }: { id: string; email: string }) => {
-      // 1. Trigger the n8n webhook
       const webhookRes = await fetch("https://robertpjd1.app.n8n.cloud/webhook/unlock-telegram", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -17,7 +16,6 @@ export function useActivateClerk() {
         throw new Error("Failed to trigger webhook activation");
       }
 
-      // 2. Update the status in Supabase
       const { data, error } = await supabase
         .from("clerks")
         .update({ status: "Activation Sent" })
@@ -29,9 +27,7 @@ export function useActivateClerk() {
       return data;
     },
     onSuccess: () => {
-      // Invalidate the clerks query to refetch data
       queryClient.invalidateQueries({ queryKey: ["clerks"] });
-      // Also invalidate kpis to update the pending count
       queryClient.invalidateQueries({ queryKey: ["dashboard-kpis"] });
     },
   });
@@ -42,13 +38,16 @@ export function useUploadKbDoc() {
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const res = await fetch(process.env.NEXT_PUBLIC_N8N_UPLOAD_WEBHOOK_URL!, {
+      const res = await fetch("/api/kb/upload", {
         method: "POST",
-        body: formData, // Browser automatically sets Content-Type to multipart/form-data with bounds
+        body: formData,
       });
+
       if (!res.ok) {
-        throw new Error("Failed to upload document");
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to upload document");
       }
+
       return res.json();
     },
     onSuccess: () => {
@@ -63,14 +62,17 @@ export function useDeleteKbDoc() {
 
   return useMutation({
     mutationFn: async ({ doc_id }: { doc_id: string }) => {
-      const res = await fetch(process.env.NEXT_PUBLIC_N8N_DELETE_WEBHOOK_URL!, {
+      const res = await fetch("/api/kb/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ doc_id }),
       });
+
       if (!res.ok) {
-        throw new Error("Failed to delete document");
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to delete document");
       }
+
       return res.json();
     },
     onSuccess: () => {

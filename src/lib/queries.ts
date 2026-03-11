@@ -2,11 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "./supabase";
 import { Database } from "./database.types";
 
+export type KbDocument = {
+  id: number;
+  filename: string;
+  file_path: string;
+  file_size: number;
+  uploaded_at: string;
+  created_at: string;
+};
+
 export function useDashboardKpis() {
   return useQuery({
     queryKey: ["dashboard-kpis"],
     queryFn: async () => {
-      // Fetch active clerks count
       const { count: activeClerksCount, error: clerksError } = await supabase
         .from("clerks")
         .select("*", { count: "exact", head: true })
@@ -14,21 +22,18 @@ export function useDashboardKpis() {
 
       if (clerksError) throw clerksError;
 
-      // Fetch pending clerk activations
-      const { count: pendingClerksCount, error: pendingError } = await supabase
+      const { count: pendingClerksCount } = await supabase
         .from("clerks")
         .select("*", { count: "exact", head: true })
         .eq("status", "Pending Registration");
 
-      // Fetch total documents ingested
       const { count: documentsCount, error: docsError } = await supabase
-        .from("documents")
+        .from("kb_documents")
         .select("*", { count: "exact", head: true });
 
       if (docsError) throw docsError;
-      
-      // Fetch total chunks
-      const { count: chunksCount, error: chunksError } = await supabase
+
+      const { count: chunksCount } = await supabase
         .from("chunks")
         .select("*", { count: "exact", head: true });
 
@@ -60,13 +65,12 @@ export function useClerks() {
 export function useKnowledgeBaseDocs() {
   return useQuery({
     queryKey: ["kb-docs"],
-    queryFn: async (): Promise<Database["public"]["Tables"]["documents"]["Row"][]> => {
-      const res = await fetch(process.env.NEXT_PUBLIC_N8N_LIST_WEBHOOK_URL!);
+    queryFn: async (): Promise<KbDocument[]> => {
+      const res = await fetch("/api/kb/list");
       if (!res.ok) {
         throw new Error("Failed to fetch knowledge base documents");
       }
-      const data = await res.json();
-      return data as Database["public"]["Tables"]["documents"]["Row"][];
+      return res.json();
     },
   });
 }
