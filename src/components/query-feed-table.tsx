@@ -50,6 +50,7 @@ export function QueryFeedTable({ data, isLoading }: QueryFeedTableProps) {
   const { mutate: resolveQuery, isPending: isResolving } = useResolveQuery();
 
   const handleResolveOpen = (id: string, currentText?: string | null, aiDraft?: string | null) => {
+    console.log("handleResolveOpen aiDraft:", aiDraft);
     setResolvingId(id);
     setResolutionText(currentText || aiDraft || "");
   };
