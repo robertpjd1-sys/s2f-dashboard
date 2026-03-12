@@ -9,7 +9,7 @@ export default function QueryFeedPage() {
   const { data: queries, isLoading } = useQueriesFeed();
 
   const totalQueries = kpis?.totalQueries || 0;
-  const resolvedCount = kpis?.resolvedThisWeek || 0;
+  const resolvedCount = kpis?.resolved || 0;
   const unansweredCount = kpis?.unanswered || 0;
 
   return (
@@ -28,7 +28,7 @@ export default function QueryFeedPage() {
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <div className="flex flex-row items-center justify-between space-y-0 pb-2">
             <h3 className="tracking-tight text-sm font-medium text-slate-500">
-              Total Queries
+              Total
             </h3>
             <MessageSquare className="h-4 w-4 text-slate-400" />
           </div>
@@ -42,7 +42,7 @@ export default function QueryFeedPage() {
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <div className="flex flex-row items-center justify-between space-y-0 pb-2">
             <h3 className="tracking-tight text-sm font-medium text-slate-500">
-              Resolved This Week
+              Auto-Resolved
             </h3>
             <Bot className="h-4 w-4 text-green-500" />
           </div>
@@ -56,7 +56,7 @@ export default function QueryFeedPage() {
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <div className="flex flex-row items-center justify-between space-y-0 pb-2">
             <h3 className="tracking-tight text-sm font-medium text-slate-500">
-              Unanswered
+              Needs Attention
             </h3>
             <AlertCircle className="h-4 w-4 text-amber-500" />
           </div>

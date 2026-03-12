@@ -95,32 +95,34 @@ export function useQueryFeedKpis() {
   return useQuery({
     queryKey: ["query-feed-kpis"],
     queryFn: async () => {
-      // We can do this in one call or multiple. Usually multiple counts is fine for dashboard.
+      // Get today's start date
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      // Total = all rows today
       const { count: total, error: errTotal } = await supabase
         .from("unanswered_queries")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .gte("asked_at", todayStart.toISOString());
         
       if (errTotal) throw errTotal;
 
+      // Needs Attention = rows where status = 'unanswered'
       const { count: unanswered } = await supabase
         .from("unanswered_queries")
         .select("*", { count: "exact", head: true })
         .eq("status", "unanswered");
 
-      // For "Resolved This Week", we use a rough approximation (last 7 days)
-      const lastWeek = new Date();
-      lastWeek.setDate(lastWeek.getDate() - 7);
-      
-      const { count: resolvedWeek } = await supabase
+      // Auto-Resolved = rows where status = 'resolved'
+      const { count: resolved } = await supabase
         .from("unanswered_queries")
         .select("*", { count: "exact", head: true })
-        .eq("status", "resolved")
-        .gte("asked_at", lastWeek.toISOString());
+        .eq("status", "resolved");
 
       return {
         totalQueries: total || 0,
         unanswered: unanswered || 0,
-        resolvedThisWeek: resolvedWeek || 0,
+        resolved: resolved || 0,
       };
     },
   });
