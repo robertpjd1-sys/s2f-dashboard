@@ -11,7 +11,7 @@ import {
   ColumnDef,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-import { MessageSquareWarning, CheckCircle2, ChevronLeft, ChevronRight, Loader2, Bot } from "lucide-react";
+import { MessageSquareWarning, CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 import {
   Table,
@@ -35,19 +35,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Database } from "@/lib/database.types";
 import { useResolveQuery } from "@/lib/mutations";
-
-const stripMarkdown = (str: string | null | undefined) => {
-  if (!str) return '';
-  return str
-    .replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
-    .replace(/(\*|_)(.*?)\1/g, '$2') // italic
-    .replace(/~~(.*?)~~/g, '$1') // strikethrough
-    .replace(/`([^`]+)`/g, '$1') // inline code
-    .replace(/^#+\s+/gm, '') // headers
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1') // images
-    .replace(/^\s*>\s+/gm, ''); // blockquotes
-};
 
 type QueryRow = Database["public"]["Tables"]["unanswered_queries"]["Row"];
 
@@ -90,12 +77,6 @@ export function QueryFeedTable({ data, isLoading }: QueryFeedTableProps) {
       cell: ({ row }) => (
         <div className="flex flex-col gap-1 max-w-[400px]">
           <span className="font-medium text-slate-900">{row.original.question}</span>
-          {row.original.status === "resolved" && row.original.resolution && (
-            <div className="text-xs text-slate-500 bg-slate-50 p-2 rounded-md mt-1 border border-slate-100 flex items-start gap-2">
-              <Bot className="h-3.5 w-3.5 mt-0.5 text-green-600 shrink-0" />
-              <span>{stripMarkdown(row.original.resolution)}</span>
-            </div>
-          )}
         </div>
       ),
     },
