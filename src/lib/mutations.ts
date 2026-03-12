@@ -81,3 +81,25 @@ export function useDeleteKbDoc() {
     },
   });
 }
+
+export function useResolveQuery() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, resolution }: { id: string; resolution: string }) => {
+      const { data, error } = await supabase
+        .from("unanswered_queries")
+        .update({ status: "resolved", resolution })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["queries-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["query-feed-kpis"] });
+    },
+  });
+}

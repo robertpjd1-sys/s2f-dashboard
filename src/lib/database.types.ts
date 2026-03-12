@@ -103,21 +103,51 @@ export interface Database {
         Row: {
           id: string
           doc_id: string | null
+          file_name: string | null
           content: string
           chunk_index: number
         }
         Insert: Omit<{
           id: string
           doc_id: string | null
+          file_name: string | null
           content: string
           chunk_index: number
         }, 'id'>
         Update: Partial<Omit<{
           id: string
           doc_id: string | null
+          file_name: string | null
           content: string
           chunk_index: number
         }, 'id'>>
+        Relationships: []
+      }
+      unanswered_queries: {
+        Row: {
+          id: string
+          question: string
+          asked_by: string
+          asked_at: string
+          status: string
+          resolution: string | null
+        }
+        Insert: Omit<{
+          id: string
+          question: string
+          asked_by: string
+          asked_at: string
+          status: string
+          resolution: string | null
+        }, 'id' | 'asked_at' | 'status'>
+        Update: Partial<Omit<{
+          id: string
+          question: string
+          asked_by: string
+          asked_at: string
+          status: string
+          resolution: string | null
+        }, 'id' | 'asked_at'>>
         Relationships: []
       }
     }

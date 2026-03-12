@@ -35,7 +35,8 @@ export function useDashboardKpis() {
 
       const { count: chunksCount } = await supabase
         .from("chunks")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .not("file_name", "is", null);
 
       return {
         activeClerks: activeClerksCount || 0,
@@ -71,6 +72,56 @@ export function useKnowledgeBaseDocs() {
         throw new Error("Failed to fetch knowledge base documents");
       }
       return res.json();
+    },
+  });
+}
+
+export function useQueriesFeed() {
+  return useQuery({
+    queryKey: ["queries-feed"],
+    queryFn: async (): Promise<Database["public"]["Tables"]["unanswered_queries"]["Row"][]> => {
+      const { data, error } = await supabase
+        .from("unanswered_queries")
+        .select("*")
+        .order("asked_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Database["public"]["Tables"]["unanswered_queries"]["Row"][];
+    },
+  });
+}
+
+export function useQueryFeedKpis() {
+  return useQuery({
+    queryKey: ["query-feed-kpis"],
+    queryFn: async () => {
+      // We can do this in one call or multiple. Usually multiple counts is fine for dashboard.
+      const { count: total, error: errTotal } = await supabase
+        .from("unanswered_queries")
+        .select("*", { count: "exact", head: true });
+        
+      if (errTotal) throw errTotal;
+
+      const { count: unanswered } = await supabase
+        .from("unanswered_queries")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "unanswered");
+
+      // For "Resolved This Week", we use a rough approximation (last 7 days)
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      
+      const { count: resolvedWeek } = await supabase
+        .from("unanswered_queries")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "resolved")
+        .gte("asked_at", lastWeek.toISOString());
+
+      return {
+        totalQueries: total || 0,
+        unanswered: unanswered || 0,
+        resolvedThisWeek: resolvedWeek || 0,
+      };
     },
   });
 }
