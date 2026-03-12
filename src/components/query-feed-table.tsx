@@ -241,8 +241,8 @@ export function QueryFeedTable({ data, isLoading }: QueryFeedTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  No queries found.
+                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground p-8">
+                  No queries yet — clerk bot queries will appear here.
                 </TableCell>
               </TableRow>
             )}
