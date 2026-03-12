@@ -49,9 +49,9 @@ export function QueryFeedTable({ data, isLoading }: QueryFeedTableProps) {
   const [resolutionText, setResolutionText] = useState("");
   const { mutate: resolveQuery, isPending: isResolving } = useResolveQuery();
 
-  const handleResolveOpen = (id: string, currentText?: string | null) => {
+  const handleResolveOpen = (id: string, currentText?: string | null, aiDraft?: string | null) => {
     setResolvingId(id);
-    setResolutionText(currentText || "");
+    setResolutionText(currentText || aiDraft || "");
   };
 
   const handleResolveSubmit = () => {
@@ -138,7 +138,7 @@ export function QueryFeedTable({ data, isLoading }: QueryFeedTableProps) {
               variant={isResolved ? "ghost" : "default"}
               size="sm"
               className={isResolved ? "text-slate-500" : "bg-[#3d5a3e] hover:bg-[#2d422e] text-white"}
-              onClick={() => handleResolveOpen(row.original.id, row.original.resolution)}
+              onClick={() => handleResolveOpen(row.original.id, row.original.resolution, row.original.ai_draft)}
               disabled={isResolved && !row.original.resolution}
             >
               {isResolved ? (row.original.resolution ? "Edit Note" : "Resolved") : "Resolve"}

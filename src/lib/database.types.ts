@@ -131,6 +131,7 @@ export interface Database {
           asked_at: string
           status: string
           resolution: string | null
+          ai_draft: string | null
         }
         Insert: Omit<{
           id: string
@@ -139,6 +140,7 @@ export interface Database {
           asked_at: string
           status: string
           resolution: string | null
+          ai_draft: string | null
         }, 'id' | 'asked_at' | 'status'>
         Update: Partial<Omit<{
           id: string
@@ -147,6 +149,7 @@ export interface Database {
           asked_at: string
           status: string
           resolution: string | null
+          ai_draft: string | null
         }, 'id' | 'asked_at'>>
         Relationships: []
       }
