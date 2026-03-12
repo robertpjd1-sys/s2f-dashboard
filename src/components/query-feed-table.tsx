@@ -127,16 +127,24 @@ export function QueryFeedTable({ data, isLoading }: QueryFeedTableProps) {
       id: "actions",
       cell: ({ row }) => {
         const isResolved = row.original.status === "resolved";
+        
+        if (isResolved) {
+          return (
+            <div className="flex justify-end pr-4">
+              <span className="text-sm font-medium text-slate-500">Resolved</span>
+            </div>
+          );
+        }
+
         return (
           <div className="flex justify-end pr-4">
             <Button
-              variant={isResolved ? "ghost" : "default"}
+              variant="default"
               size="sm"
-              className={isResolved ? "text-slate-500" : "bg-[#3d5a3e] hover:bg-[#2d422e] text-white"}
+              className="bg-[#3d5a3e] hover:bg-[#2d422e] text-white"
               onClick={() => handleResolveOpen(row.original.id, row.original.resolution, row.original.ai_draft)}
-              disabled={isResolved && !row.original.resolution}
             >
-              {isResolved ? (row.original.resolution ? "Edit Note" : "Resolved") : "Resolve"}
+              Resolve
             </Button>
           </div>
         );
