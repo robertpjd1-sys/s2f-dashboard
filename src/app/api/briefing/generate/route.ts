@@ -4,19 +4,35 @@ export async function POST(req: Request) {
   try {
     const stats = await req.json();
 
+    // Determine time of day for greeting
+    const now = new Date();
+    // Use local time for greeting context - local time is 14:36 (2:36 PM)
+    const hour = now.getHours();
+    
+    let timeGreeting = "morning";
+    let formalGreeting = "Good morning";
+    
+    if (hour >= 12 && hour < 17) {
+      timeGreeting = "afternoon";
+      formalGreeting = "Good afternoon";
+    } else if (hour >= 17) {
+      timeGreeting = "evening";
+      formalGreeting = "Good evening";
+    }
+
     if (!process.env.ANTHROPIC_API_KEY) {
       // Fallback if no API key is set
       console.warn("ANTHROPIC_API_KEY is not set. Returning fallback data.");
       return NextResponse.json({
-        greeting: `Good morning, Cosmina! Today we have ${stats.queriesToday || 0} queries with ${stats.unansweredTotal || 0} needing attention. You have ${stats.activeClerks || 0} active clerks on the platform. Have a wonderful day!`,
+        greeting: `${formalGreeting}, Cosmina! Today we have ${stats.queriesToday || 0} queries with ${stats.unansweredTotal || 0} needing attention. You have ${stats.activeClerks || 0} active clerks on the platform. Have a wonderful ${timeGreeting}!`,
         action: `Review the ${stats.unansweredTotal || 0} unanswered queries to maintain our resolution rate.`,
       });
     }
 
-    const systemPrompt = `You are a helpful AI assistant powering a dashboard for a user named Cosmina. Your job is to generate a beautiful, warm morning briefing and a single smart action based on the live stats provided. 
+    const systemPrompt = `You are a helpful AI assistant powering a dashboard for a user named Cosmina. Your job is to generate a beautiful, warm ${timeGreeting} briefing and a single smart action based on the live stats provided. 
     
 Return a JSON object with exactly two keys:
-1. "greeting": A warm 3-sentence morning briefing addressed to "Cosmina" summarising the day's stats.
+1. "greeting": A warm 3-sentence ${timeGreeting} briefing addressed to "Cosmina" summarising the day's stats.
 2. "action": One specific recommended action for Cosmina today based on these stats. Keep it concise and actionable.
 
 Stats for today:
@@ -120,8 +136,10 @@ ${JSON.stringify(stats, null, 2)}
         if (ttsResponse.ok) {
           const audioBuffer = await ttsResponse.arrayBuffer();
           audioBase64 = Buffer.from(audioBuffer).toString("base64");
+          console.log(`[ElevenLabs] Audio generated successfully for greeting. Base64 length: ${audioBase64.length}`);
         } else {
-          console.error("ElevenLabs API Error:", await ttsResponse.text());
+          const errorText = await ttsResponse.text();
+          console.error("ElevenLabs API Error:", errorText);
         }
       } catch (ttsErr) {
         console.error("ElevenLabs Generation Error:", ttsErr);

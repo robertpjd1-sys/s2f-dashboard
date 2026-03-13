@@ -90,6 +90,7 @@ export default function MorningBriefingPage() {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
       
+      console.log("[MorningBriefing] Decoding and playing audio...");
       const audioData = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
       const buffer = await audioContextRef.current.decodeAudioData(audioData.buffer);
       
@@ -97,13 +98,16 @@ export default function MorningBriefingPage() {
       source.buffer = buffer;
       source.connect(audioContextRef.current.destination);
       
-      source.onended = () => setIsSpeaking(false);
+      source.onended = () => {
+        setIsSpeaking(false);
+        console.log("[MorningBriefing] Audio playback ended.");
+      };
       
       sourceNodeRef.current = source;
       setIsSpeaking(true);
       source.start(0);
     } catch (err) {
-      console.error("Error playing ElevenLabs audio:", err);
+      console.error("[MorningBriefing] Error playing ElevenLabs audio:", err);
       setIsSpeaking(false);
     }
   };
@@ -133,17 +137,29 @@ export default function MorningBriefingPage() {
       })
       .then(res => res.json())
       .then(data => {
-        setBriefing(data);
-        
+        if (data.audio) {
+          console.log("[MorningBriefing] Audio received from API, length:", data.audio.length);
+        } else {
+          console.warn("[MorningBriefing] No audio received from API.");
+        }
+
         // Autoplay logic: Check if we've already played today or if we are muted
         const today = new Date().toLocaleDateString();
-        const lastPlayed = localStorage.getItem("briefing_played_today");
+        // User requested to check briefing_played_date
+        const lastPlayed = localStorage.getItem("briefing_played_date");
         const hasPlayedToday = lastPlayed === today;
         const currentlyMuted = sessionStorage.getItem("briefingMuted") === "true";
 
+        console.log("[MorningBriefing] Autoplay check:", { hasPlayedToday, currentlyMuted, hasAudio: !!data.audio });
+
         if (data.audio && !hasPlayedToday && !currentlyMuted) {
+          console.log("[MorningBriefing] Initiating autoplay...");
           speak(data.audio, true);
-          localStorage.setItem("briefing_played_today", today);
+          localStorage.setItem("briefing_played_date", today);
+        } else if (hasPlayedToday) {
+          console.log("[MorningBriefing] Autoplay skipped: already played today.");
+        } else if (currentlyMuted) {
+          console.log("[MorningBriefing] Autoplay skipped: session is muted.");
         }
       })
       .catch(err => console.error("Error generating briefing:", err));
