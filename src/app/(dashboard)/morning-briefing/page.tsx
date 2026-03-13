@@ -108,7 +108,8 @@ export default function MorningBriefingPage() {
     }
 
     if (!audioBase64) {
-      if (text) speakFallback(text);
+      // if (text) speakFallback(text);
+      console.warn("[MorningBriefing] No audio data provided, fallback disabled for debugging.");
       return;
     }
 
