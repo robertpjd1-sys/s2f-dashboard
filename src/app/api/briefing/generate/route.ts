@@ -98,7 +98,40 @@ ${JSON.stringify(stats, null, 2)}
       };
     }
 
-    return NextResponse.json(parsedData);
+    // Generate audio with ElevenLabs
+    let audioBase64 = null;
+    if (process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID && parsedData.greeting) {
+      try {
+        const ttsResponse = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${process.env.ELEVENLABS_VOICE_ID}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "xi-api-key": process.env.ELEVENLABS_API_KEY,
+            },
+            body: JSON.stringify({
+              model_id: "eleven_multilingual_v2",
+              text: parsedData.greeting,
+            }),
+          }
+        );
+
+        if (ttsResponse.ok) {
+          const audioBuffer = await ttsResponse.arrayBuffer();
+          audioBase64 = Buffer.from(audioBuffer).toString("base64");
+        } else {
+          console.error("ElevenLabs API Error:", await ttsResponse.text());
+        }
+      } catch (ttsErr) {
+        console.error("ElevenLabs Generation Error:", ttsErr);
+      }
+    }
+
+    return NextResponse.json({
+      ...parsedData,
+      audio: audioBase64
+    });
   } catch (err) {
     console.error("Briefing Generation Error:", err);
     return NextResponse.json(

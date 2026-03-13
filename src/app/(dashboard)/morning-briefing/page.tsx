@@ -2,7 +2,7 @@
 
 
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
 import { Mic, Zap, AlertCircle, Play, ArrowRight, CheckCircle2, MessageSquareWarning, Users, LayoutList, Database as DbIcon, CheckSquare, VolumeX } from "lucide-react";
 import Link from "next/link";
@@ -57,9 +57,12 @@ export default function MorningBriefingPage() {
   const { data: clerks } = useClerks();
   const { data: allQueries } = useQueriesFeed();
 
-  const [briefing, setBriefing] = useState<{ greeting: string, action: string } | null>(null);
+  const [briefing, setBriefing] = useState<{ greeting: string, action: string, audio?: string | null } | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -67,43 +70,53 @@ export default function MorningBriefingPage() {
     }
   }, []);
 
-  // Voice playback logic
-  const speak = (text: string, forcePlay = false) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
+  // Voice playback logic (ElevenLabs)
+  const speak = async (audioBase64: string | null | undefined, forcePlay = false) => {
+    if (!audioBase64 || typeof window === "undefined") return;
     
     const currentlyMuted = sessionStorage.getItem("briefingMuted") === "true";
     if (currentlyMuted && !forcePlay) return;
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.1;
+    // Stop currently playing audio
+    if (sourceNodeRef.current) {
+      try {
+        sourceNodeRef.current.stop();
+      } catch (e) { /* ignore */ }
+      sourceNodeRef.current = null;
+    }
 
-    const setVoiceAndSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const ukFemale = voices.find(v => 
-        (v.lang === 'en-GB' && v.name.includes('Female')) || 
-        v.name === 'Google UK English Female'
-      ) || voices.find(v => v.lang === 'en-GB');
-      
-      if (ukFemale) {
-        utterance.voice = ukFemale;
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
-      window.speechSynthesis.speak(utterance);
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.addEventListener('voiceschanged', setVoiceAndSpeak, { once: true });
-    } else {
-      setVoiceAndSpeak();
+      
+      const audioData = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
+      const buffer = await audioContextRef.current.decodeAudioData(audioData.buffer);
+      
+      const source = audioContextRef.current.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContextRef.current.destination);
+      
+      source.onended = () => setIsSpeaking(false);
+      
+      sourceNodeRef.current = source;
+      setIsSpeaking(true);
+      source.start(0);
+    } catch (err) {
+      console.error("Error playing ElevenLabs audio:", err);
+      setIsSpeaking(false);
     }
   };
 
   const handleMute = () => {
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    if (sourceNodeRef.current) {
+      try {
+        sourceNodeRef.current.stop();
+      } catch (e) { /* ignore */ }
+      sourceNodeRef.current = null;
+    }
+    
+    if (typeof window !== "undefined") {
       sessionStorage.setItem("briefingMuted", "true");
     }
     setIsMuted(true);
@@ -121,9 +134,17 @@ export default function MorningBriefingPage() {
       .then(res => res.json())
       .then(data => {
         setBriefing(data);
-        // Force play on first load as requested, ignoring previous mute state for the morning greeting
-        // but allowing the mute button to stop it.
-        speak(data.greeting, true);
+        
+        // Autoplay logic: Check if we've already played today or if we are muted
+        const today = new Date().toLocaleDateString();
+        const lastPlayed = localStorage.getItem("briefing_played_today");
+        const hasPlayedToday = lastPlayed === today;
+        const currentlyMuted = sessionStorage.getItem("briefingMuted") === "true";
+
+        if (data.audio && !hasPlayedToday && !currentlyMuted) {
+          speak(data.audio, true);
+          localStorage.setItem("briefing_played_today", today);
+        }
       })
       .catch(err => console.error("Error generating briefing:", err));
     }
@@ -185,7 +206,7 @@ export default function MorningBriefingPage() {
                   onClick={() => {
                     if (typeof window !== "undefined") sessionStorage.removeItem("briefingMuted");
                     setIsMuted(false);
-                    if (briefing) speak(briefing.greeting, true);
+                    if (briefing?.audio) speak(briefing.audio, true);
                   }}
                   disabled={!briefing}
                   className="h-8 shadow-sm flex items-center gap-1.5"
