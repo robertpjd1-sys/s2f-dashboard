@@ -78,7 +78,7 @@ export default function MorningBriefingPage() {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
-    utterance.rate = 0.9;
+    utterance.rate = 1.0;
     utterance.pitch = 1.1;
 
     const setVoiceAndSpeak = () => {
@@ -121,7 +121,9 @@ export default function MorningBriefingPage() {
       .then(res => res.json())
       .then(data => {
         setBriefing(data);
-        speak(data.greeting);
+        // Force play on first load as requested, ignoring previous mute state for the morning greeting
+        // but allowing the mute button to stop it.
+        speak(data.greeting, true);
       })
       .catch(err => console.error("Error generating briefing:", err));
     }
