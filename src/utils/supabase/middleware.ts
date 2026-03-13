@@ -33,14 +33,25 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login')
-  ) {
+  const isLoginPage = request.nextUrl.pathname.startsWith('/login')
+
+  if (!user && !isLoginPage) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  // MFA Enforcement: If user exists and has MFA factors enrolled,
+  // ensure they are at AAL2 before allowing access to dashboard
+  if (user && !isLoginPage) {
+    const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    
+    if (!aalError && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

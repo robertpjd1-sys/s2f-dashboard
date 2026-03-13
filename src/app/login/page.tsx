@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,29 @@ export default function LoginPage() {
 
   const router = useRouter();
   const supabase = createClient();
+
+  // Check for existing session that requires MFA
+  useEffect(() => {
+    async function checkExistingMfa() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: aal, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+          // MFA is enrolled but not verified
+          const { data: factors } = await supabase.auth.mfa.listFactors();
+          const totpFactor = factors?.totp?.[0];
+          if (totpFactor) {
+            setMfaFactorId(totpFactor.id);
+            setStep("mfa");
+          }
+        } else if (aal && aal.currentLevel === 'aal2') {
+          // Already fully verified, send to dashboard
+          router.push("/morning-briefing");
+        }
+      }
+    }
+    checkExistingMfa();
+  }, [supabase, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
