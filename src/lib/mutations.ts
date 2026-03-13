@@ -111,22 +111,18 @@ export function useInviteClerk() {
 
   return useMutation({
     mutationFn: async ({ full_name, email, location }: { full_name: string; email: string; location: string }) => {
-      const registration_token = crypto.randomUUID();
-      
-      const { data, error } = await supabase
-        .from("clerks")
-        .insert({
-          full_name,
-          email,
-          location,
-          status: "Pending Confirmation",
-          registration_token,
-          invited_date: new Date().toISOString(),
-        } as any)
-        .select()
-        .single();
+      const response = await fetch("/api/clerks/invite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ full_name, email, location }),
+      });
 
-      if (error) throw error;
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to invite clerk");
+      }
       return data;
     },
     onSuccess: () => {

@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Lock,
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -105,6 +105,7 @@ function Toggle({
 
 // ─── Main page ───────────────────────────────────────────────────────────────
 export default function SettingsPage() {
+  const supabase = createClient();
   // Profile state
   const [name, setName] = useState("Robert");
   const [email, setEmail] = useState("");
@@ -196,6 +197,9 @@ export default function SettingsPage() {
   async function handleEnrollMfa() {
     setIsEnrollingMfa(true);
     try {
+      // Ensure session is active to avoid "missing sub claim" error
+      await supabase.auth.getSession();
+
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
         issuer: "S2F Dashboard",
