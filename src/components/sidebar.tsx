@@ -15,7 +15,10 @@ import {
   LineChart,
   Bell,
   Settings,
+  LogOut,
 } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 const navigation = [
   { name: "Morning Briefing", href: "/morning-briefing", icon: LayoutDashboard },
@@ -68,7 +71,7 @@ export function Sidebar() {
             );
           })}
           
-          <li className="mt-auto">
+          <li className="mt-auto flex flex-col gap-y-1">
             <Link
               href="/settings"
               className={cn(
@@ -87,6 +90,21 @@ export function Sidebar() {
               />
               Settings
             </Link>
+            
+            <button
+              onClick={async () => {
+                const supabase = createClient();
+                await supabase.auth.signOut();
+                window.location.href = "/login";
+              }}
+              className="group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-colors text-slate-400 hover:bg-red-950/30 hover:text-red-400 border-l-2 border-transparent w-full text-left"
+            >
+              <LogOut
+                className="h-5 w-5 shrink-0 text-slate-400 group-hover:text-red-400"
+                aria-hidden="true"
+              />
+              Sign Out
+            </button>
           </li>
         </ul>
       </nav>
