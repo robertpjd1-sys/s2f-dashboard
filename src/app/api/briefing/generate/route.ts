@@ -116,15 +116,21 @@ ${JSON.stringify(stats, null, 2)}
 
     // Generate audio with ElevenLabs
     let audioBase64 = null;
-    if (process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID && parsedData.greeting) {
+    const voiceId = process.env.ELEVENLABS_VOICE_ID;
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+
+    console.log(`[ElevenLabs] Checking config: VoiceID=${voiceId ? 'Set' : 'Missing'}, APIKey=${apiKey ? 'Set' : 'Missing'}`);
+
+    if (apiKey && voiceId && parsedData.greeting) {
       try {
+        console.log(`[ElevenLabs] Making POST request to: https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`);
         const ttsResponse = await fetch(
-          `https://api.elevenlabs.io/v1/text-to-speech/${process.env.ELEVENLABS_VOICE_ID}`,
+          `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "xi-api-key": process.env.ELEVENLABS_API_KEY,
+              "xi-api-key": apiKey,
             },
             body: JSON.stringify({
               model_id: "eleven_multilingual_v2",
@@ -133,17 +139,21 @@ ${JSON.stringify(stats, null, 2)}
           }
         );
 
+        console.log(`[ElevenLabs] Response status: ${ttsResponse.status} ${ttsResponse.statusText}`);
+
         if (ttsResponse.ok) {
           const audioBuffer = await ttsResponse.arrayBuffer();
           audioBase64 = Buffer.from(audioBuffer).toString("base64");
-          console.log(`[ElevenLabs] Audio generated successfully for greeting. Base64 length: ${audioBase64.length}`);
+          console.log(`[ElevenLabs] Audio generated successfully. Base64 length: ${audioBase64.length}`);
         } else {
           const errorText = await ttsResponse.text();
-          console.error("ElevenLabs API Error:", errorText);
+          console.error("[ElevenLabs] API Error Body:", errorText);
         }
       } catch (ttsErr) {
-        console.error("ElevenLabs Generation Error:", ttsErr);
+        console.error("[ElevenLabs] Fetch/Generation Error:", ttsErr);
       }
+    } else {
+      console.warn("[ElevenLabs] Skipping TTS generation: Missing API key, Voice ID, or greeting text.");
     }
 
     return NextResponse.json({

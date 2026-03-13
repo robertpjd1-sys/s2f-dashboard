@@ -70,7 +70,9 @@ export default function MorningBriefingPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setIsMuted(sessionStorage.getItem("briefingMuted") === "true");
+      // Logic for persistent mute could go here if needed, 
+      // but user asked to remove briefingMuted session flag.
+      setIsMuted(false); 
     }
   }, []);
 
@@ -96,8 +98,7 @@ export default function MorningBriefingPage() {
 
   // Voice playback logic (ElevenLabs with Fallback)
   const speak = async (audioBase64: string | null | undefined, text?: string, forcePlay = false) => {
-    const currentlyMuted = sessionStorage.getItem("briefingMuted") === "true";
-    if (currentlyMuted && !forcePlay) return;
+    if (isMuted && !forcePlay) return;
 
     // Stop currently playing audio
     if (sourceNodeRef.current) {
@@ -108,8 +109,7 @@ export default function MorningBriefingPage() {
     }
 
     if (!audioBase64) {
-      // if (text) speakFallback(text);
-      console.warn("[MorningBriefing] No audio data provided, fallback disabled for debugging.");
+      if (text) speakFallback(text);
       return;
     }
 
@@ -135,8 +135,8 @@ export default function MorningBriefingPage() {
       setIsSpeaking(true);
       source.start(0);
     } catch (err) {
-      console.error("[MorningBriefing] ElevenLabs playback failed, fallback disabled for debugging:", err);
-      // if (text) speakFallback(text);
+      console.error("[MorningBriefing] ElevenLabs playback failed, using fallback:", err);
+      if (text) speakFallback(text);
     }
   };
 
@@ -152,9 +152,6 @@ export default function MorningBriefingPage() {
       window.speechSynthesis.cancel();
     }
     
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("briefingMuted", "true");
-    }
     setIsMuted(true);
     setIsSpeaking(false);
   };
@@ -171,22 +168,17 @@ export default function MorningBriefingPage() {
         setBriefing(data);
         
         const today = new Date().toLocaleDateString();
-        const currentlyMuted = sessionStorage.getItem("briefingMuted") === "true";
-
         console.log("[MorningBriefing] Data received. Session autoplay status:", hasAutoplayedThisSession);
 
         // Autoplay logic: 
         // 1. Play if we haven't played in this SPA session yet (hasAutoplayedThisSession is false)
-        // 2. AND session is not muted
-        if (!hasAutoplayedThisSession && !currentlyMuted) {
+        if (!hasAutoplayedThisSession) {
           console.log("[MorningBriefing] Initiating fresh-load autoplay...");
           hasAutoplayedThisSession = true; // Mark as played for this session (SPA navigation)
           speak(data.audio, data.greeting, true);
           localStorage.setItem("briefing_played_date", today);
-        } else if (hasAutoplayedThisSession) {
+        } else {
           console.log("[MorningBriefing] Autoplay suppressed: already played in this session.");
-        } else if (currentlyMuted) {
-          console.log("[MorningBriefing] Autoplay suppressed: muted.");
         }
       })
       .catch(err => console.error("Error generating briefing:", err));
@@ -247,7 +239,6 @@ export default function MorningBriefingPage() {
                   variant="outline" 
                   size="sm" 
                   onClick={() => {
-                    if (typeof window !== "undefined") sessionStorage.removeItem("briefingMuted");
                     setIsMuted(false);
                     if (briefing) speak(briefing.audio, briefing.greeting, true);
                   }}
