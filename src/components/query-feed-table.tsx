@@ -46,19 +46,21 @@ interface QueryFeedTableProps {
 export function QueryFeedTable({ data, isLoading }: QueryFeedTableProps) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [resolvingQuestion, setResolvingQuestion] = useState("");
   const [resolutionText, setResolutionText] = useState("");
   const { mutate: resolveQuery, isPending: isResolving } = useResolveQuery();
 
-  const handleResolveOpen = (id: string, currentText?: string | null, aiDraft?: string | null) => {
+  const handleResolveOpen = (id: string, question: string, currentText?: string | null, aiDraft?: string | null) => {
     console.log("handleResolveOpen aiDraft:", aiDraft);
     setResolvingId(id);
+    setResolvingQuestion(question);
     setResolutionText(currentText || aiDraft || "");
   };
 
   const handleResolveSubmit = () => {
     if (!resolvingId) return;
     resolveQuery(
-      { id: resolvingId, resolution: resolutionText },
+      { id: resolvingId, resolution: resolutionText, question: resolvingQuestion },
       {
         onSuccess: () => {
           setResolvingId(null);
@@ -142,7 +144,7 @@ export function QueryFeedTable({ data, isLoading }: QueryFeedTableProps) {
               variant="default"
               size="sm"
               className="bg-[#3d5a3e] hover:bg-[#2d422e] text-white"
-              onClick={() => handleResolveOpen(row.original.id, row.original.resolution, row.original.ai_draft)}
+              onClick={() => handleResolveOpen(row.original.id, row.original.question, row.original.resolution, row.original.ai_draft)}
             >
               Resolve
             </Button>

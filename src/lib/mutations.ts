@@ -86,16 +86,18 @@ export function useResolveQuery() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, resolution }: { id: string; resolution: string }) => {
-      const { data, error } = await supabase
-        .from("unanswered_queries")
-        .update({ status: "resolved", resolution })
-        .eq("id", id)
-        .select()
-        .single();
+    mutationFn: async ({ id, resolution, question }: { id: string; resolution: string; question: string }) => {
+      const webhookRes = await fetch("https://robertpjd1.app.n8n.cloud/webhook/s2f-resolve-ingest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, resolution, question }),
+      });
 
-      if (error) throw error;
-      return data;
+      if (!webhookRes.ok) {
+        throw new Error("Failed to trigger resolve webhook");
+      }
+
+      return webhookRes.json().catch(() => ({ success: true }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["queries-feed"] });
