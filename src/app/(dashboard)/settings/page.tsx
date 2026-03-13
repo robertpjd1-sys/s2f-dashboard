@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Webhook,
@@ -120,6 +120,23 @@ export default function SettingsPage() {
   const [autoAssign, setAutoAssign] = useState(false);
   const [defaultView, setDefaultView] = useState<"list" | "board">("list");
   const [savingPrefs, setSavingPrefs] = useState(false);
+
+  // Initialize dark mode from DOM/localStorage
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains("dark");
+    setDarkMode(isDark);
+  }, []);
+
+  const handleDarkModeToggle = (val: boolean) => {
+    setDarkMode(val);
+    if (val) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("s2f-theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("s2f-theme", "light");
+    }
+  };
 
   // ── Handlers ────────────────────────────────────────────────────────────
   async function handleSaveProfile() {
@@ -317,7 +334,7 @@ export default function SettingsPage() {
             id="dark-mode"
             label="Dark Mode"
             checked={darkMode}
-            onChange={setDarkMode}
+            onChange={handleDarkModeToggle}
           />
           <Toggle
             id="email-notifications"
