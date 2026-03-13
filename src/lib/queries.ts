@@ -127,3 +127,124 @@ export function useQueryFeedKpis() {
     },
   });
 }
+
+export function useMorningBriefingKpis() {
+  return useQuery({
+    queryKey: ["morning-briefing-kpis"],
+    queryFn: async () => {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayIso = todayStart.toISOString();
+
+      const { count: queriesToday } = await supabase
+        .from("unanswered_queries")
+        .select("*", { count: "exact", head: true })
+        .gte("asked_at", todayIso);
+
+      const { count: resolvedToday } = await supabase
+        .from("unanswered_queries")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "resolved")
+        .gte("asked_at", todayIso);
+
+      const { count: unansweredTotal } = await supabase
+        .from("unanswered_queries")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "unanswered");
+
+      const { count: activeClerks } = await supabase
+        .from("clerks")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "Active");
+
+      const { count: pendingActivations } = await supabase
+        .from("clerks")
+        .select("*", { count: "exact", head: true })
+        .eq("telegram_access", false);
+
+      // New KB Chunks Today: Chunks belonging to documents ingested today
+      const { data: recentDocs } = await supabase
+        .from("documents")
+        .select("id")
+        .gte("ingested_at", todayIso);
+
+      let newKbChunksToday = 0;
+      if (recentDocs && recentDocs.length > 0) {
+        const docIds = recentDocs.map((d) => d.id);
+        const { count } = await supabase
+          .from("chunks")
+          .select("*", { count: "exact", head: true })
+          .in("doc_id", docIds);
+        newKbChunksToday = count || 0;
+      }
+
+      return {
+        queriesToday: queriesToday || 0,
+        resolvedToday: resolvedToday || 0,
+        unansweredTotal: unansweredTotal || 0,
+        activeClerks: activeClerks || 0,
+        pendingActivations: pendingActivations || 0,
+        newKbChunksToday,
+      };
+    },
+  });
+}
+
+export function useRecentUnresolvedQueries() {
+  return useQuery({
+    queryKey: ["recent-unresolved-queries"],
+    queryFn: async (): Promise<Database["public"]["Tables"]["unanswered_queries"]["Row"][]> => {
+      const { data, error } = await supabase
+        .from("unanswered_queries")
+        .select("*")
+        .eq("status", "unanswered")
+        .order("asked_at", { ascending: true })
+        .limit(5);
+
+      if (error) throw error;
+      return data as Database["public"]["Tables"]["unanswered_queries"]["Row"][];
+    },
+  });
+}
+
+export function useKbHealthStats() {
+  return useQuery({
+    queryKey: ["kb-health-stats"],
+    queryFn: async () => {
+      const { count: totalChunks } = await supabase
+        .from("chunks")
+        .select("*", { count: "exact", head: true })
+        .not("file_name", "is", null);
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { data: recentDocs } = await supabase
+        .from("documents")
+        .select("id")
+        .gte("ingested_at", todayStart.toISOString());
+
+      let chunksAddedToday = 0;
+      if (recentDocs && recentDocs.length > 0) {
+        const docIds = recentDocs.map((d) => d.id);
+        const { count } = await supabase
+          .from("chunks")
+          .select("*", { count: "exact", head: true })
+          .in("doc_id", docIds);
+        chunksAddedToday = count || 0;
+      }
+
+      const { data: latestDoc } = await supabase
+        .from("documents")
+        .select("ingested_at")
+        .order("ingested_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      return {
+        totalChunks: totalChunks || 0,
+        chunksAddedToday,
+        mostRecentIngestionDate: latestDoc?.ingested_at || null,
+      };
+    },
+  });
+}
