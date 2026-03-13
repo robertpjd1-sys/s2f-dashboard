@@ -1,10 +1,12 @@
-"use client";
-
+import { useState } from "react";
 import { ClerksTable } from "@/components/clerks-table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { InviteClerkModal } from "@/components/invite-clerk-modal";
 
 export default function ClerksPage() {
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -15,7 +17,10 @@ export default function ClerksPage() {
           </p>
         </div>
         <div className="flex shrink-0">
-          <Button className="bg-[#d19c3e] hover:bg-[#c38c33] text-white">
+          <Button 
+            className="bg-[#d19c3e] hover:bg-[#c38c33] text-white"
+            onClick={() => setModalOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Invite Clerk
           </Button>
@@ -23,6 +28,11 @@ export default function ClerksPage() {
       </div>
 
       <ClerksTable />
+
+      <InviteClerkModal 
+        open={modalOpen} 
+        onOpenChange={setModalOpen} 
+      />
     </div>
   );
 }

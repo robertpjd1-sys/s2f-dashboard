@@ -105,3 +105,33 @@ export function useResolveQuery() {
     },
   });
 }
+
+export function useInviteClerk() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ full_name, email, location }: { full_name: string; email: string; location: string }) => {
+      const registration_token = crypto.randomUUID();
+      
+      const { data, error } = await supabase
+        .from("clerks")
+        .insert({
+          full_name,
+          email,
+          location,
+          status: "Pending Confirmation",
+          registration_token,
+          invited_date: new Date().toISOString(),
+        } as any)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clerks"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-kpis"] });
+    },
+  });
+}

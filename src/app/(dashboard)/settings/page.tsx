@@ -11,7 +11,10 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -121,10 +124,26 @@ export default function SettingsPage() {
   const [defaultView, setDefaultView] = useState<"list" | "board">("list");
   const [savingPrefs, setSavingPrefs] = useState(false);
 
+  // MFA state
+  const [mfaFactors, setMfaFactors] = useState<any[]>([]);
+  const [isEnrollingMfa, setIsEnrollingMfa] = useState(false);
+  const [mfaEnrollData, setMfaEnrollData] = useState<{ id: string; qr_code: string } | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [isVerifyingMfa, setIsVerifyingMfa] = useState(false);
+
   // Initialize dark mode from DOM/localStorage
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark");
     setDarkMode(isDark);
+
+    // Fetch MFA factors
+    async function fetchMfa() {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (!error) {
+        setMfaFactors(data.totp || []);
+      }
+    }
+    fetchMfa();
   }, []);
 
   const handleDarkModeToggle = (val: boolean) => {
@@ -172,6 +191,57 @@ export default function SettingsPage() {
     await new Promise((r) => setTimeout(r, 700));
     setSavingPrefs(false);
     toast.success("Preferences saved.");
+  }
+
+  async function handleEnrollMfa() {
+    setIsEnrollingMfa(true);
+    try {
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: "totp",
+        issuer: "S2F Dashboard",
+        friendlyName: name || "User",
+      });
+      if (error) throw error;
+      setMfaEnrollData({ id: data.id, qr_code: data.totp.qr_code });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start MFA enrollment");
+    } finally {
+      setIsEnrollingMfa(false);
+    }
+  }
+
+  async function handleVerifyMfa() {
+    if (!mfaEnrollData || !mfaCode) return;
+    setIsVerifyingMfa(true);
+    try {
+      const { data, error } = await supabase.auth.mfa.challengeAndVerify({
+        factorId: mfaEnrollData.id,
+        code: mfaCode,
+      });
+      if (error) throw error;
+      toast.success("2FA enrolled successfully!");
+      setMfaEnrollData(null);
+      setMfaCode("");
+      // Refresh factors
+      const { data: listData } = await supabase.auth.mfa.listFactors();
+      setMfaFactors(listData?.totp || []);
+    } catch (err: any) {
+      toast.error(err.message || "Verification failed");
+    } finally {
+      setIsVerifyingMfa(false);
+    }
+  }
+
+  async function handleUnenrollMfa(factorId: string) {
+    if (!confirm("Are you sure you want to disable 2FA? This will make your account less secure.")) return;
+    try {
+      const { error } = await supabase.auth.mfa.unenroll({ factorId });
+      if (error) throw error;
+      toast.success("2FA removed.");
+      setMfaFactors(mfaFactors.filter(f => f.id !== factorId));
+    } catch (err: any) {
+      toast.error(err.message || "Failed to remove 2FA");
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -384,6 +454,113 @@ export default function SettingsPage() {
               "Save Preferences"
             )}
           </Button>
+        </div>
+      </SectionCard>
+
+      {/* ── 4. Security & 2FA ────────────────────────────────────────── */}
+      <SectionCard icon={ShieldCheck} title="Security & Two-Factor">
+        <div className="space-y-6">
+          <div className="flex items-start gap-4">
+            <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20">
+              <Lock className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Double your security</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-lg">
+                Add an extra layer of protection to your account with Two-Factor Authentication (TOTP). 
+                Once enabled, you&apos;ll need to provide a 6-digit code from an authenticator app like Google Authenticator or Authy.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 p-5 pt-4">
+            {mfaFactors.length > 0 ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200">2FA is currently active</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    onClick={() => handleUnenrollMfa(mfaFactors[0].id)}
+                  >
+                    Disable 2FA
+                  </Button>
+                </div>
+                <div className="text-xs text-slate-400 font-mono">
+                  Factor ID: {mfaFactors[0].id}
+                </div>
+              </div>
+            ) : mfaEnrollData ? (
+              <div className="space-y-6 flex flex-col items-center py-2">
+                <div className="text-center space-y-1">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Scan QR Code</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Scan this with your authenticator app</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-xl border-2 border-slate-100 shadow-sm"
+                     dangerouslySetInnerHTML={{ __html: mfaEnrollData.qr_code }} />
+                
+                <div className="w-full max-w-[240px] space-y-3 pt-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="mfa-code" className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Verification Code
+                    </Label>
+                    <Input
+                      id="mfa-code"
+                      placeholder="000000"
+                      value={mfaCode}
+                      onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      className="text-center font-mono text-xl tracking-widest h-12 dark:bg-slate-950 dark:border-slate-800"
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => setMfaEnrollData(null)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-[#d19c3e] hover:bg-[#c38c33] text-white"
+                      disabled={mfaCode.length !== 6 || isVerifyingMfa}
+                      onClick={handleVerifyMfa}
+                    >
+                      {isVerifyingMfa ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-center sm:text-left">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Shield your login</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Recommended for administrator accounts.</p>
+                </div>
+                <Button 
+                  onClick={handleEnrollMfa}
+                  disabled={isEnrollingMfa}
+                  className="bg-[#d19c3e] hover:bg-[#c38c33] text-white min-w-[140px]"
+                >
+                  {isEnrollingMfa ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Starting...
+                    </>
+                  ) : (
+                     "Enrol 2FA"
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </SectionCard>
     </div>
