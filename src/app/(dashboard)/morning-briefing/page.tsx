@@ -135,8 +135,8 @@ export default function MorningBriefingPage() {
       setIsSpeaking(true);
       source.start(0);
     } catch (err) {
-      console.error("[MorningBriefing] ElevenLabs playback failed, falling back:", err);
-      if (text) speakFallback(text);
+      console.error("[MorningBriefing] ElevenLabs playback failed, fallback disabled for debugging:", err);
+      // if (text) speakFallback(text);
     }
   };
 
