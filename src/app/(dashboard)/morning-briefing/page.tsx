@@ -61,9 +61,10 @@ export default function MorningBriefingPage() {
   const { data: clerks } = useClerks();
   const { data: allQueries } = useQueriesFeed();
 
-  const [briefing, setBriefing] = useState<{ greeting: string, action: string, audio?: string | null } | null>(null);
+  const [briefing, setBriefing] = useState<{ greeting: string, action: string, audio?: string | null, ttsError?: string | null } | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
@@ -76,25 +77,6 @@ export default function MorningBriefingPage() {
     }
   }, []);
 
-  // Browser Web Speech API fallback
-  const speakFallback = (text: string) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    
-    console.log("[MorningBriefing] Using Web Speech API fallback...");
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    
-    // Optional: Select a specific voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const premiumVoice = voices.find(v => v.name.includes("Google") || v.name.includes("Premium"));
-    if (premiumVoice) utterance.voice = premiumVoice;
-    
-    window.speechSynthesis.speak(utterance);
-  };
 
   // Voice playback logic (ElevenLabs with Fallback)
   const speak = async (audioBase64: string | null | undefined, text?: string, forcePlay = false) => {
@@ -109,10 +91,11 @@ export default function MorningBriefingPage() {
     }
 
     if (!audioBase64) {
-      if (text) speakFallback(text);
+      console.warn("[MorningBriefing] No audio data provided.");
       return;
     }
 
+    setPlaybackError(null);
     try {
       if (!audioContextRef.current) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -134,9 +117,10 @@ export default function MorningBriefingPage() {
       sourceNodeRef.current = source;
       setIsSpeaking(true);
       source.start(0);
-    } catch (err) {
-      console.error("[MorningBriefing] ElevenLabs playback failed, using fallback:", err);
-      if (text) speakFallback(text);
+    } catch (err: any) {
+      console.error("[MorningBriefing] ElevenLabs playback failed:", err);
+      setPlaybackError(err.message || String(err));
+      setIsSpeaking(false);
     }
   };
 
@@ -260,9 +244,19 @@ export default function MorningBriefingPage() {
               </div>
             </div>
             {briefing ? (
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
-                {briefing.greeting}
-              </p>
+              <div className="space-y-4">
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
+                  {briefing.greeting}
+                </p>
+                {(briefing.ttsError || playbackError) && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 text-xs text-red-600 dark:text-red-400">
+                    <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold underline uppercase">Audio Error:</span> {briefing.ttsError || playbackError}
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="animate-pulse space-y-2">
                 <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-full"></div>

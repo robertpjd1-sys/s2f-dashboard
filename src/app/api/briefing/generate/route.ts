@@ -116,6 +116,7 @@ ${JSON.stringify(stats, null, 2)}
 
     // Generate audio with ElevenLabs
     let audioBase64 = null;
+    let ttsError = null;
     const voiceId = process.env.ELEVENLABS_VOICE_ID;
     const apiKey = process.env.ELEVENLABS_API_KEY;
 
@@ -146,19 +147,26 @@ ${JSON.stringify(stats, null, 2)}
           audioBase64 = Buffer.from(audioBuffer).toString("base64");
           console.log(`[ElevenLabs] Audio generated successfully. Base64 length: ${audioBase64.length}`);
         } else {
-          const errorText = await ttsResponse.text();
-          console.error("[ElevenLabs] API Error Body:", errorText);
+          ttsError = await ttsResponse.text();
+          console.error("[ElevenLabs] API Error Body:", ttsError);
         }
-      } catch (ttsErr) {
+      } catch (ttsErr: any) {
+        ttsError = ttsErr.message || String(ttsErr);
         console.error("[ElevenLabs] Fetch/Generation Error:", ttsErr);
       }
     } else {
-      console.warn("[ElevenLabs] Skipping TTS generation: Missing API key, Voice ID, or greeting text.");
+      const missing = [];
+      if (!apiKey) missing.push("API Key");
+      if (!voiceId) missing.push("Voice ID");
+      if (!parsedData.greeting) missing.push("Greeting Text");
+      ttsError = `Missing configuration: ${missing.join(", ")}`;
+      console.warn(`[ElevenLabs] Skipping TTS generation: ${ttsError}`);
     }
 
     return NextResponse.json({
       ...parsedData,
-      audio: audioBase64
+      audio: audioBase64,
+      ttsError: ttsError
     });
   } catch (err) {
     console.error("Briefing Generation Error:", err);
