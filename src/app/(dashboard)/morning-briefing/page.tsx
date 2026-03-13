@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Mic, Zap, AlertCircle, Play, ArrowRight, CheckCircle2, MessageSquareWarning, Users, LayoutList, Database as DbIcon, CheckSquare } from "lucide-react";
+import { Mic, Zap, AlertCircle, Play, ArrowRight, CheckCircle2, MessageSquareWarning, Users, LayoutList, Database as DbIcon, CheckSquare, VolumeX } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,16 +59,55 @@ export default function MorningBriefingPage() {
 
   const [briefing, setBriefing] = useState<{ greeting: string, action: string } | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsMuted(sessionStorage.getItem("briefingMuted") === "true");
+    }
+  }, []);
 
   // Voice playback logic
-  const speak = (text: string) => {
+  const speak = (text: string, forcePlay = false) => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
+    
+    const currentlyMuted = sessionStorage.getItem("briefingMuted") === "true";
+    if (currentlyMuted && !forcePlay) return;
+
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
-    utterance.rate = 0.95; // Slightly slower, more natural pace
-    window.speechSynthesis.speak(utterance);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.1;
+
+    const setVoiceAndSpeak = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const ukFemale = voices.find(v => 
+        (v.lang === 'en-GB' && v.name.includes('Female')) || 
+        v.name === 'Google UK English Female'
+      ) || voices.find(v => v.lang === 'en-GB');
+      
+      if (ukFemale) {
+        utterance.voice = ukFemale;
+      }
+      window.speechSynthesis.speak(utterance);
+    };
+
+    if (window.speechSynthesis.getVoices().length === 0) {
+      window.speechSynthesis.addEventListener('voiceschanged', setVoiceAndSpeak, { once: true });
+    } else {
+      setVoiceAndSpeak();
+    }
+  };
+
+  const handleMute = () => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      sessionStorage.setItem("briefingMuted", "true");
+    }
+    setIsMuted(true);
+    setIsSpeaking(false);
   };
 
   useEffect(() => {
@@ -137,16 +176,31 @@ export default function MorningBriefingPage() {
                 <Mic className={`h-5 w-5 ${isSpeaking ? 'text-green-500 animate-pulse' : 'text-slate-400'}`} />
                 Daily Briefing
               </h3>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => briefing && speak(briefing.greeting)}
-                disabled={!briefing}
-                className="h-8 shadow-sm flex items-center gap-1.5"
-              >
-                <Play className="h-3 w-3" />
-                Replay
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    if (typeof window !== "undefined") sessionStorage.removeItem("briefingMuted");
+                    setIsMuted(false);
+                    if (briefing) speak(briefing.greeting, true);
+                  }}
+                  disabled={!briefing}
+                  className="h-8 shadow-sm flex items-center gap-1.5"
+                >
+                  <Play className="h-3 w-3" />
+                  Replay
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleMute}
+                  className={`h-8 shadow-sm flex items-center gap-1.5 ${isMuted ? 'bg-slate-100 text-slate-400' : 'text-slate-600'}`}
+                >
+                  <VolumeX className="h-3 w-3" />
+                  Mute
+                </Button>
+              </div>
             </div>
             {briefing ? (
               <p className="text-slate-600 leading-relaxed text-sm">
