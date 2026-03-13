@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { ClerksTable } from "@/components/clerks-table";
 import { Button } from "@/components/ui/button";
