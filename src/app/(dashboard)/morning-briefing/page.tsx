@@ -131,10 +131,6 @@ export default function MorningBriefingPage() {
       } catch (e) { /* ignore */ }
       sourceNodeRef.current = null;
     }
-    // Also stop fallback if playing
-    if (typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
     
     setIsMuted(true);
     setIsSpeaking(false);

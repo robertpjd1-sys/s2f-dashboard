@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { useUnreadNotificationCount } from "@/lib/queries";
 
 const navigation = [
   { name: "Morning Briefing", href: "/morning-briefing", icon: LayoutDashboard },
@@ -35,6 +36,7 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: unreadCount = 0 } = useUnreadNotificationCount();
 
   return (
     <div className="flex w-64 flex-col bg-[#1a231a] text-slate-300 border-r border-[#263526]">
@@ -47,25 +49,33 @@ export function Sidebar() {
         <ul role="list" className="flex flex-1 flex-col gap-y-1 px-4">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
+            const isNotification = item.name === "Notification Centre";
             return (
               <li key={item.name}>
                 <Link
                   href={item.href}
                   className={cn(
-                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-colors",
+                    "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-colors justify-between items-center",
                     isActive
                       ? "bg-[#263526] text-white border-l-2 border-[#d19c3e]"
                       : "hover:bg-[#263526]/50 hover:text-white border-l-2 border-transparent"
                   )}
                 >
-                  <item.icon
-                    className={cn(
-                      "h-5 w-5 shrink-0",
-                      isActive ? "text-[#d19c3e]" : "text-slate-400 group-hover:text-white"
-                    )}
-                    aria-hidden="true"
-                  />
-                  {item.name}
+                  <div className="flex items-center gap-x-3">
+                    <item.icon
+                      className={cn(
+                        "h-5 w-5 shrink-0",
+                        isActive ? "text-[#d19c3e]" : "text-slate-400 group-hover:text-white"
+                      )}
+                      aria-hidden="true"
+                    />
+                    {item.name}
+                  </div>
+                  {isNotification && unreadCount > 0 && (
+                    <span className="inline-flex items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-medium text-white ring-1 ring-inset ring-red-500/10 min-w-5 h-5 text-center">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
               </li>
             );

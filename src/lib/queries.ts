@@ -248,3 +248,53 @@ export function useKbHealthStats() {
     },
   });
 }
+
+// Notifications Queries
+export function useNotifications() {
+  return useQuery({
+    queryKey: ["notifications"],
+    queryFn: async (): Promise<Database["public"]["Tables"]["notifications"]["Row"][]> => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Database["public"]["Tables"]["notifications"]["Row"][];
+    },
+  });
+}
+
+export function useUnreadNotificationCount() {
+  return useQuery({
+    queryKey: ["unread-notifications-count"],
+    queryFn: async (): Promise<number> => {
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("read", false);
+
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+}
+
+// Use these directly or with react-query mutations
+export async function markNotificationRead(id: string) {
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read: true, read_at: new Date().toISOString() })
+    .eq("id", id);
+    
+  if (error) throw error;
+}
+
+export async function markAllNotificationsRead() {
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read: true, read_at: new Date().toISOString() })
+    .eq("read", false);
+    
+  if (error) throw error;
+}

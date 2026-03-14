@@ -6,156 +6,410 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
   public: {
     Tables: {
+      chunks: {
+        Row: {
+          category: string | null
+          chunk_index: number
+          client_name: string | null
+          content: string
+          doc_id: string | null
+          embedding: string
+          file_name: string | null
+          id: string
+          ingested_at: string | null
+          metadata: Json | null
+          source: string | null
+        }
+        Insert: {
+          category?: string | null
+          chunk_index?: number
+          client_name?: string | null
+          content: string
+          doc_id?: string | null
+          embedding: string
+          file_name?: string | null
+          id?: string
+          ingested_at?: string | null
+          metadata?: Json | null
+          source?: string | null
+        }
+        Update: {
+          category?: string | null
+          chunk_index?: number
+          client_name?: string | null
+          content?: string
+          doc_id?: string | null
+          embedding?: string
+          file_name?: string | null
+          id?: string
+          ingested_at?: string | null
+          metadata?: Json | null
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chunks_doc_id_fkey"
+            columns: ["doc_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clerks: {
         Row: {
-          id: string
-          full_name: string
+          created_at: string | null
           email: string
+          full_name: string
+          id: string
+          invited_date: string | null
+          last_active: string | null
+          location: string | null
           phone: string | null
-          telegram_id: string | null
-          telegram_username: string | null
+          registered_date: string | null
           registration_token: string | null
           status: string | null
-          invited_date: string | null
-          registered_date: string | null
-          training_complete: boolean | null
           telegram_access: boolean | null
+          telegram_id: string | null
+          telegram_username: string | null
           total_questions: number | null
-          last_active: string | null
-          created_at: string | null
-          location: string | null
+          training_complete: boolean | null
         }
-        Insert: Omit<{
-          id: string
-          full_name: string
+        Insert: {
+          created_at?: string | null
           email: string
-          phone: string | null
-          telegram_id: string | null
-          telegram_username: string | null
-          registration_token: string | null
-          status: string | null
-          invited_date: string | null
-          registered_date: string | null
-          training_complete: boolean | null
-          telegram_access: boolean | null
-          total_questions: number | null
-          last_active: string | null
-          created_at: string | null
-          location: string | null
-        }, 'id' | 'created_at'>
-        Update: Partial<Omit<{
-          id: string
           full_name: string
-          email: string
-          phone: string | null
-          telegram_id: string | null
-          telegram_username: string | null
-          registration_token: string | null
-          status: string | null
-          invited_date: string | null
-          registered_date: string | null
-          training_complete: boolean | null
-          telegram_access: boolean | null
-          total_questions: number | null
-          last_active: string | null
-          created_at: string | null
-          location: string | null
-        }, 'id' | 'created_at'>>
+          id?: string
+          invited_date?: string | null
+          last_active?: string | null
+          location?: string | null
+          phone?: string | null
+          registered_date?: string | null
+          registration_token?: string | null
+          status?: string | null
+          telegram_access?: boolean | null
+          telegram_id?: string | null
+          telegram_username?: string | null
+          total_questions?: number | null
+          training_complete?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          invited_date?: string | null
+          last_active?: string | null
+          location?: string | null
+          phone?: string | null
+          registered_date?: string | null
+          registration_token?: string | null
+          status?: string | null
+          telegram_access?: boolean | null
+          telegram_id?: string | null
+          telegram_username?: string | null
+          total_questions?: number | null
+          training_complete?: boolean | null
+        }
         Relationships: []
       }
       documents: {
         Row: {
-          id: string
-          file_name: string
-          client_name: string
-          uploaded_by: string
           category: string
+          client_name: string
           drive_link: string | null
-          source: string | null
+          file_name: string
+          id: string
           ingested_at: string
+          source: string | null
+          uploaded_by: string
         }
-        Insert: Omit<{
-          id: string
+        Insert: {
+          category?: string
+          client_name?: string
+          drive_link?: string | null
           file_name: string
-          client_name: string
-          uploaded_by: string
-          category: string
-          drive_link: string | null
-          source: string | null
-          ingested_at: string
-        }, 'id'>
-        Update: Partial<Omit<{
           id: string
-          file_name: string
-          client_name: string
-          uploaded_by: string
-          category: string
-          drive_link: string | null
-          source: string | null
-          ingested_at: string
-        }, 'id'>>
+          ingested_at?: string
+          source?: string | null
+          uploaded_by?: string
+        }
+        Update: {
+          category?: string
+          client_name?: string
+          drive_link?: string | null
+          file_name?: string
+          id?: string
+          ingested_at?: string
+          source?: string | null
+          uploaded_by?: string
+        }
         Relationships: []
       }
-      chunks: {
+      kb_documents: {
         Row: {
-          id: string
-          doc_id: string | null
-          file_name: string | null
-          content: string
-          chunk_index: number
+          created_at: string
+          file_path: string | null
+          file_size: number | null
+          filename: string | null
+          id: number
+          uploaded_at: string | null
         }
-        Insert: Omit<{
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          file_size?: number | null
+          filename?: string | null
+          id?: number
+          uploaded_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          file_size?: number | null
+          filename?: string | null
+          id?: number
+          uploaded_at?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
           id: string
-          doc_id: string | null
-          file_name: string | null
-          content: string
-          chunk_index: number
-        }, 'id'>
-        Update: Partial<Omit<{
-          id: string
-          doc_id: string | null
-          file_name: string | null
-          content: string
-          chunk_index: number
-        }, 'id'>>
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          read_at: string | null
+          source: string | null
+          title: string
+          type: string | null
+          urgency: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          read_at?: string | null
+          source?: string | null
+          title: string
+          type?: string | null
+          urgency?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          read_at?: string | null
+          source?: string | null
+          title?: string
+          type?: string | null
+          urgency?: string | null
+        }
         Relationships: []
       }
       unanswered_queries: {
         Row: {
+          ai_draft: string | null
+          asked_at: string
+          asked_by: string
+          chat_id: number | null
           id: string
           question: string
-          asked_by: string
-          asked_at: string
-          status: string
           resolution: string | null
-          ai_draft: string | null
+          status: string
         }
-        Insert: Omit<{
-          id: string
-          question: string
+        Insert: {
+          ai_draft?: string | null
+          asked_at?: string
           asked_by: string
-          asked_at: string
-          status: string
-          resolution: string | null
-          ai_draft: string | null
-        }, 'id' | 'asked_at' | 'status'>
-        Update: Partial<Omit<{
-          id: string
+          chat_id?: number | null
+          id?: string
           question: string
-          asked_by: string
-          asked_at: string
-          status: string
-          resolution: string | null
-          ai_draft: string | null
-        }, 'id' | 'asked_at'>>
+          resolution?: string | null
+          status?: string
+        }
+        Update: {
+          ai_draft?: string | null
+          asked_at?: string
+          asked_by?: string
+          chat_id?: number | null
+          id?: string
+          question?: string
+          resolution?: string | null
+          status?: string
+        }
         Relationships: []
       }
     }
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      match_chunks: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          category: string
+          client_name: string
+          content: string
+          doc_id: string
+          file_name: string
+          id: string
+          ingested_at: string
+          similarity: number
+          source: string
+        }[]
+      }
+      match_documents: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          content: string
+          id: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
