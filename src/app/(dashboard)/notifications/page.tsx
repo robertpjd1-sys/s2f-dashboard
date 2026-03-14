@@ -28,6 +28,41 @@ export default function NotificationsPage() {
     queryClient.invalidateQueries({ queryKey: ["unread-notifications-count"] });
   };
 
+  const handleComplianceAction = async (notificationId: string, complianceUpdateId: string, action: "approve" | "reject") => {
+    try {
+      const res = await fetch("https://robertpjd1.app.n8n.cloud/webhook/s2f-compliance-approve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          compliance_update_id: complianceUpdateId,
+          action,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit action.");
+      }
+
+      // Mark the notification as read so it stops asking
+      await markNotificationRead(notificationId);
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-notifications-count"] });
+      
+      // We need to import toast from "sonner" at the top
+      // We will do that in the next chunk
+      
+      // Let's assume toast is imported
+      const { toast } = await import("sonner");
+      toast.success(`Compliance update ${action}d successfully.`);
+    } catch (error) {
+      const { toast } = await import("sonner");
+      toast.error("An error occurred while submitting your action.");
+      console.error(error);
+    }
+  };
+
   const filteredNotifications = notifications.filter((notif) => {
     if (activeTab === "all") return true;
     if (activeTab === "unread") return !notif.read;
@@ -128,6 +163,26 @@ export default function NotificationsPage() {
                         <Clock className="mr-1 h-3 w-3" />
                         {notification.created_at ? formatDistanceToNow(new Date(notification.created_at), { addSuffix: true }) : "Unknown time"}
                       </div>
+                      
+                      {notification.type === "compliance" && notification.metadata && typeof notification.metadata === "object" && "compliance_update_id" in notification.metadata && (
+                        <div className="flex items-center gap-3 pt-4 border-t mt-4">
+                          <Button 
+                            className="bg-green-600 hover:bg-green-700 text-white" 
+                            size="sm"
+                            onClick={() => handleComplianceAction(notification.id, (notification.metadata as any).compliance_update_id, "approve")}
+                          >
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Approve
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleComplianceAction(notification.id, (notification.metadata as any).compliance_update_id, "reject")}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
                     {!notification.read && (

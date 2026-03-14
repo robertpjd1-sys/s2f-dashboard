@@ -121,6 +121,101 @@ export type Database = {
         }
         Relationships: []
       }
+      compliance_notifications: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          clerk_id: string | null
+          clerk_name: string | null
+          created_at: string | null
+          id: string
+          notified_at: string | null
+          run_date: string | null
+          urgency: string | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          clerk_id?: string | null
+          clerk_name?: string | null
+          created_at?: string | null
+          id?: string
+          notified_at?: string | null
+          run_date?: string | null
+          urgency?: string | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          clerk_id?: string | null
+          clerk_name?: string | null
+          created_at?: string | null
+          id?: string
+          notified_at?: string | null
+          run_date?: string | null
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_notifications_clerk_id_fkey"
+            columns: ["clerk_id"]
+            isOneToOne: false
+            referencedRelation: "clerks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_updates: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          chunk_text: string | null
+          clerks_notified: boolean | null
+          created_at: string | null
+          id: string
+          overall_urgency: string | null
+          raw_perplexity_response: string | null
+          run_date: string
+          simplified_updates: Json | null
+          status: string | null
+          telegram_message: string | null
+          title: string | null
+          updates_count: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          chunk_text?: string | null
+          clerks_notified?: boolean | null
+          created_at?: string | null
+          id?: string
+          overall_urgency?: string | null
+          raw_perplexity_response?: string | null
+          run_date: string
+          simplified_updates?: Json | null
+          status?: string | null
+          telegram_message?: string | null
+          title?: string | null
+          updates_count?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          chunk_text?: string | null
+          clerks_notified?: boolean | null
+          created_at?: string | null
+          id?: string
+          overall_urgency?: string | null
+          raw_perplexity_response?: string | null
+          run_date?: string
+          simplified_updates?: Json | null
+          status?: string | null
+          telegram_message?: string | null
+          title?: string | null
+          updates_count?: number | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           category: string

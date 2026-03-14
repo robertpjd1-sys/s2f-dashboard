@@ -298,3 +298,19 @@ export async function markAllNotificationsRead() {
     
   if (error) throw error;
 }
+
+export function useComplianceUpdates() {
+  return useQuery({
+    queryKey: ["compliance-updates"],
+    queryFn: async (): Promise<Database["public"]["Tables"]["compliance_updates"]["Row"][]> => {
+      const { data, error } = await supabase
+        .from("compliance_updates")
+        .select("*")
+        .eq("status", "completed")
+        .order("run_date", { ascending: false });
+
+      if (error) throw error;
+      return data as Database["public"]["Tables"]["compliance_updates"]["Row"][];
+    },
+  });
+}

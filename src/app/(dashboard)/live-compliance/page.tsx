@@ -2,26 +2,26 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { 
-  ShieldAlert, 
-  Home, 
-  Clock, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Info,
-  ArrowRight
+import {
+  ShieldAlert,
+  Home,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useComplianceUpdates } from "@/lib/queries";
 import { 
   dummyComplianceAlerts, 
-  dummyRegulatoryChanges,
   ComplianceAlertSeverity 
 } from "@/lib/dummy-compliance-data";
 
 export default function LiveCompliancePage() {
   const [alerts, setAlerts] = useState(dummyComplianceAlerts);
+  const { data: regulatoryChanges = [], isLoading } = useComplianceUpdates();
 
   const handleResolve = (id: string) => {
     setAlerts(alerts.filter(a => a.id !== id));
@@ -172,29 +172,37 @@ export default function LiveCompliancePage() {
           </h3>
           
           <div className="rounded-xl border bg-white shadow-sm divide-y">
-            {dummyRegulatoryChanges.map((change) => (
+            {isLoading ? (
+              <div className="p-12 pl-6 flex justify-center text-slate-400">Loading regulatory changes...</div>
+            ) : regulatoryChanges.length === 0 ? (
+              <div className="p-8 text-center text-sm text-slate-500">No completed regulatory updates found.</div>
+            ) : regulatoryChanges.map((change) => {
+              const summaries = change.simplified_updates as Array<{ summary?: string }> | null;
+              let description = "No summary available.";
+              if (summaries && summaries.length > 0) {
+                description = summaries[0].summary || description;
+              }
+
+              return (
               <div key={change.id} className="p-5 hover:bg-slate-50 transition-colors">
                 <div className="flex justify-between items-start mb-2 gap-4">
                   <h4 className="font-semibold text-slate-900 leading-tight">
-                    {change.title}
+                    {change.title || "Untitled Update"}
                   </h4>
-                  <Badge variant="secondary" className="shrink-0 bg-slate-100 text-slate-700">
-                    {change.source}
+                  <Badge variant={change.overall_urgency === "high" ? "destructive" : change.overall_urgency === "medium" ? "default" : "secondary"} className={change.overall_urgency === "high" ? "" : change.overall_urgency === "medium" ? "bg-amber-100 text-amber-800 hover:bg-amber-200 border-none" : "bg-slate-100 text-slate-700 hover:bg-slate-200 border-none shrink-0"}>
+                    {change.overall_urgency ? change.overall_urgency.toUpperCase() : "LOW"}
                   </Badge>
                 </div>
                 <p className="text-sm text-slate-600 mb-3 leading-relaxed">
-                  {change.description}
+                  {description}
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-slate-400">
-                    {format(new Date(change.date), "MMM do, yyyy")}
+                    {change.run_date ? format(new Date(change.run_date), "MMM do, yyyy") : "Unknown Date"}
                   </span>
-                  <Button variant="ghost" size="sm" className="h-8 gap-1 text-[#d19c3e] hover:text-[#c38c33] hover:bg-amber-50">
-                    Read more <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
